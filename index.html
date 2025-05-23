@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Driver Training Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="languageSelectSection" class="section active">
+    <h2>Select Language</h2>
+    <select id="languageSelect">
+      <option value="">-- Choose --</option>
+      <option value="Swahili">Swahili</option>
+      <option value="Bemba">Bemba</option>
+      <option value="Portuguese">Portuguese</option>
+    </select>
+    <button onclick="proceedToLogin()">Continue</button>
+  </div>
+
+  <div id="loginSection" class="section">
+    <h2 id="loginTitle">Driver Login</h2>
+    <input type="text" id="driverName" placeholder="Enter Full Name" />
+    <input type="text" id="truckNumber" placeholder="Enter Truck Number" />
+    <button onclick="loadDashboard()">Login</button>
+  </div>
+
+  <div id="dashboardSection" class="section">
+    <h2 id="dashboardTitle">Assigned Trainings</h2>
+    <div id="videoListContainer"></div>
+    <div id="videoPlayerContainer" style="display: none;">
+      <h3 id="currentVideoTitle"></h3>
+      <video id="trainingVideo" controls autoplay></video>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
