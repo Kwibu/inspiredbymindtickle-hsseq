@@ -1,29 +1,8 @@
-// ==== GLOBAL STATE ====
 let currentDriver = { name: "", truck: "", language: "" };
 let watchedStatus = {};
 let lastAllowedTime = 0;
+let videoAssignments = {};
 
-// ==== MOCK ASSIGNMENTS ====
-const videoAssignments = {
-  "John Doe": [
-    {
-      title: "Swahili Safety Talk",
-      url: "https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(Swahili).mp4"
-    },
-    {
-      title: "General Driving Rules",
-      url: "https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(English).mp4"
-    }
-  ],
-  "Jane Smith": [
-    {
-      title: "Portuguese Safety Guide",
-      url: "https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(Portugal).mp4"
-    }
-  ]
-};
-
-// ==== LANGUAGE HANDLER ====
 function proceedToLogin() {
   const lang = document.getElementById("languageSelect").value;
   if (!lang) return alert("Please choose a language.");
@@ -31,8 +10,13 @@ function proceedToLogin() {
   switchSection("languageSelectSection", "loginSection");
 }
 
-// ==== LOGIN & DASHBOARD LOADING ====
-function loadDashboard() {
+async function fetchDriverVideos(name) {
+  const response = await fetch(`https://script.google.com/macros/s/AKfycbzSHUSBRiMZmnO0IPcDvzTsgiHRypijvWooYF6t2Ut-7oCAK-fO9pgdXsVZ4t1PUwUn/exec?name=${encodeURIComponent(name)}`);
+  const data = await response.json();
+  return data;
+}
+
+async function loadDashboard() {
   const name = document.getElementById("driverName").value.trim();
   const truck = document.getElementById("truckNumber").value.trim();
   if (!name || !truck) return alert("Please enter your name and truck number.");
@@ -40,35 +24,35 @@ function loadDashboard() {
   currentDriver.name = name;
   currentDriver.truck = truck;
 
-  const assigned = videoAssignments[name];
+  const assigned = await fetchDriverVideos(name);
   if (!assigned || assigned.length === 0) {
-    alert("No videos assigned to this driver.");
+    alert("No videos assigned.");
     return;
   }
 
-  watchedStatus = {}; // reset progress
+  watchedStatus = {};
+  assigned.forEach((v, i) => {
+    watchedStatus[i] = v.status || "Not Started";
+  });
+
+  videoAssignments[name] = assigned;
   displayVideos(assigned);
   switchSection("loginSection", "dashboardSection");
 }
 
-// ==== DISPLAY VIDEO LIST ====
 function displayVideos(videos) {
   const container = document.getElementById("videoListContainer");
   container.innerHTML = "";
 
   videos.forEach((video, index) => {
-    watchedStatus[index] = "Not Started";
-
     const div = document.createElement("div");
     div.className = "video-entry";
     div.innerText = `${video.title} — ${watchedStatus[index]}`;
     div.onclick = () => playVideo(index, video);
-
     container.appendChild(div);
   });
 }
 
-// ==== PLAY VIDEO ====
 function playVideo(index, video) {
   const playerSection = document.getElementById("videoPlayerContainer");
   const player = document.getElementById("trainingVideo");
@@ -81,15 +65,16 @@ function playVideo(index, video) {
   watchedStatus[index] = "In Progress";
   refreshVideoList();
 
+  submitStatusUpdate({
+    name: currentDriver.name,
+    title: video.title,
+    status: "Started"
+  });
+
   lastAllowedTime = 0;
 
   player.addEventListener("timeupdate", () => {
     lastAllowedTime = player.currentTime;
-
-    if (player.duration - player.currentTime <= 5) {
-      watchedStatus[index] = "Completed";
-      refreshVideoList();
-    }
   });
 
   player.addEventListener("seeking", () => {
@@ -98,13 +83,26 @@ function playVideo(index, video) {
     }
   });
 
-  player.addEventListener("ended", () => {
-    watchedStatus[index] = "Completed";
-    refreshVideoList();
+  player.addEventListener("ended", async () => {
+    const duration = Math.round(player.duration / 60) + " minutes";
+
+    const success = await submitStatusUpdate({
+      name: currentDriver.name,
+      title: video.title,
+      status: "Completed",
+      duration: duration
+    });
+
+    if (success) {
+      watchedStatus[index] = "Completed";
+      refreshVideoList();
+      alert("✅ Video marked as completed.");
+    } else {
+      alert("⚠️ Failed to update completion status.");
+    }
   });
 }
 
-// ==== UPDATE VIDEO LIST DISPLAY ====
 function refreshVideoList() {
   const videos = videoAssignments[currentDriver.name];
   const container = document.getElementById("videoListContainer");
@@ -123,8 +121,18 @@ function refreshVideoList() {
   });
 }
 
-// ==== SECTION TOGGLING ====
 function switchSection(hideId, showId) {
   document.getElementById(hideId).classList.remove("active");
   document.getElementById(showId).classList.add("active");
+}
+
+async function submitStatusUpdate({ name, title, status, duration = "" }) {
+  const response = await fetch("https://script.google.com/macros/s/AKfycbzSHUSBRiMZmnO0IPcDvzTsgiHRypijvWooYF6t2Ut-7oCAK-fO9pgdXsVZ4t1PUwUn/exec", {
+    method: "POST",
+    body: JSON.stringify({ name, title, status, duration }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const result = await response.json();
+  return result.success;
 }
