@@ -2,920 +2,2440 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Driver Check-In</title>
+  <title>Driver Training Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --title-bg:#ffffff;
-      --title-shadow:0 2px 8px rgba(0,0,0,0.12);
-      --brand:#111827;
-      --accent:#4CAF50;
-      --danger:#f44336;
-      --muted:#94a3b8;
-      --fs-base: clamp(14px, 2.8vw, 16px);
-      --fs-h2: clamp(20px, 6vw, 28px);
-      --space: clamp(10px, 2.5vw, 16px);
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --muted: #64748b;
+      --light: #f8fafc;
+      --dark: #0f172a;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-full: 9999px;
+      --transition: all 0.2s ease;
     }
-    html, body { margin:0; padding:0; height:100%; width:100%; font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; background:url('trucks.jpg') no-repeat center center fixed; background-size:cover; font-size:var(--fs-base); }
-    body::before { content:""; position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:-1; }
-    .section{ display:none; padding:20px; } .active{ display:block; }
-    h2{ font-size:var(--fs-h2); font-weight:700; color:#222; background:var(--title-bg); display:inline-block; padding:14px 20px; border-radius:12px; box-shadow:var(--title-shadow); margin:0; }
-    .heading-wrap{ display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
-    input, select, button{ margin:10px 0; padding:calc(var(--space)*0.75) var(--space); width:100%; max-width:520px; font-size:var(--fs-base); border-radius:10px; border:1px solid #e5e7eb; }
-    button{ background-color:var(--accent); color:#fff; border:none; font-weight:700; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.08); }
-    .muted{ background-color:var(--muted); } .danger{ background-color:var(--danger); }
-    button:disabled{ opacity:.6; cursor:not-allowed; }
-    .row{ display:flex; gap:var(--space); flex-wrap:wrap; }
-    .card{ background:#fff; border-radius:14px; box-shadow:0 2px 10px rgba(0,0,0,.08); padding:16px; flex:1 1 320px; min-width:300px; }
-    .pill{ display:inline-block; font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#3730a3; margin-left:8px; }
-    .tabs{ display:flex; gap:8px; margin:12px 0 16px; align-items:center; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-    .tabs::-webkit-scrollbar{ display:none; }
-    .tab{ padding:10px 14px; border-radius:999px; background:#e5e7eb; cursor:pointer; user-select:none; white-space:nowrap; }
-    .tab.active{ background:var(--brand); color:#fff; }
-    #lobbyEmpty,#historyEmpty{ background:rgba(255,255,255,0.95); color:#222; padding:12px 16px; border-radius:10px; font-weight:500; box-shadow:0 2px 6px rgba(0,0,0,0.12); display:inline-block; margin-top:20px; }
-    .tabs .tab{ background:rgba(255,255,255,0.9); color:#111; font-weight:600; } .tabs .tab.active{ background:var(--brand); color:#fff; }
-    .dashbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
-    .driver-badge{ font-weight:600; font-size:14px; background:#111827; color:#fff; padding:8px 12px; border-radius:999px; box-shadow:var(--title-shadow); white-space:nowrap; }
-    #videoNote{ background:#fff; padding:16px; margin:12px 0; border-radius:12px; max-width:820px; box-shadow:var(--title-shadow); font-size:16px; font-weight:600; color:#222; white-space:pre-line; }
-    #videoContainer{ width:100%; max-height:80vh; }
-    #videoContainer iframe, #videoContainer video{ width:100%; height:min(56.25vw,70vh); border-radius:12px; }
-    #completionSection{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#ffffffee; padding:12px 16px; border-radius:12px; box-shadow:0 0 10px #ccc; display:none; }
-    .toast{ position:fixed; top:12px; left:50%; transform:translateX(-50%); background:#1f2937; color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.2); opacity:.95; font-size:14px; }
-    /* Admin styles */
-    #adminLoginBtn { background: var(--brand); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin: 16px auto; display: block; max-width: 520px; }
-    #adminPanelBtn { background: #6b7280; margin-left: auto; }
-    .admin-section { background: white; border-radius: 12px; padding: 20px; max-width: 800px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .admin-form { display: flex; flex-direction: column; gap: 12px; }
-    .admin-form-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .admin-form-row > * { flex: 1; min-width: 200px; }
-    .video-list { margin-top: 20px; }
-    .video-item { background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    .video-item-actions { display: flex; gap: 8px; }
-    .video-item-actions button { padding: 6px 12px; font-size: 12px; max-width: none; }
-    #newLangName { flex: 1; min-width: 200px; }
-    #addLangBtn { max-width: 150px; }
-    #adminEmail { width: 100%; max-width: 100%; box-sizing: border-box; }
-    @media (max-width:640px){
-      html,body{ background-attachment:scroll; } body::before{ background:rgba(255,255,255,0.92); }
-      .dashbar{ flex-wrap:wrap; gap:8px; }
-      #syncBtn,#changeDriverBtn{ display:none!important; }
-      .card{ min-width:auto; flex:1 1 100%; } .driver-badge{ font-size:12px; }
-      #completionSection{ right:12px; left:auto; bottom:12px; transform:none; } button{ padding:14px; }
-      .admin-form-row > * { flex: 1 1 100%; }
-      #addLangBtn { max-width: 100%; }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--dark);
+      background-color: #f1f5f9;
+      background-image: url('trucks.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.92);
+      z-index: -1;
+    }
+    
+    #app {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+    
+    /* Sections */
+    .section {
+      display: none;
+      flex: 1;
+      padding: 1.5rem 0;
+    }
+    
+    .section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .card-body {
+      padding: 1.25rem;
+    }
+    
+    .card-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-weight: 600;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+    }
+    
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    h4 { font-size: 1rem; }
+    
+    .text-muted {
+      color: var(--muted);
+    }
+    
+    .text-sm {
+      font-size: 0.875rem;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.5;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+    
+    .btn-lg {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .btn-block {
+      display: flex;
+      width: 100%;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: #15803d;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+    
+    .btn-muted {
+      background-color: var(--muted);
+      color: white;
+    }
+    
+    .btn-muted:hover {
+      background-color: #475569;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border-color: var(--border);
+      color: var(--dark);
+    }
+    
+    .btn-outline:hover {
+      background-color: #f8fafc;
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .form-control {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--dark);
+      background-color: white;
+      background-clip: padding-box;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: border-color 0.15s ease;
+    }
+    
+    .form-control:focus {
+      outline: 0;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+    }
+    
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1;
+      border-radius: var(--radius-full);
+      background-color: #e2e8f0;
+      color: #334155;
+    }
+    
+    .badge-primary {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .badge-success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .badge-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge-danger {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* Alerts */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .alert-success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    
+    .alert-warning {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .alert-danger {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* Layout Utilities */
+    .flex {
+      display: flex;
+    }
+    
+    .flex-col {
+      flex-direction: column;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-center {
+      justify-content: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 1rem; }
+    .gap-4 { gap: 1.5rem; }
+    .gap-5 { gap: 2rem; }
+    
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-3 { margin-top: 1rem; }
+    .mt-4 { margin-top: 1.5rem; }
+    .mt-5 { margin-top: 2rem; }
+    
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mb-4 { margin-bottom: 1.5rem; }
+    .mb-5 { margin-bottom: 2rem; }
+    
+    .text-center { text-align: center; }
+    
+    /* Dashboard Specific */
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .driver-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: var(--dark);
+      color: white;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+      font-size: 0.875rem;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .tab {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      background-color: #e2e8f0;
+      color: #334155;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    
+    .tab.active {
+      background-color: var(--dark);
+      color: white;
+    }
+    
+    .tabpanel {
+      display: none;
+    }
+    
+    .tabpanel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Video Player */
+    .video-player-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .video-player {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background-color: black;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    
+    .video-player iframe,
+    .video-player video {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    /* Completion Section */
+    .completion-section {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+      display: none;
+      max-width: 90%;
+      width: 400px;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--dark);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 50;
+      display: none;
+      max-width: 90%;
+      width: 350px;
+      text-align: center;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Local Only Badge */
+    .local-only {
+      background-color: #ffedd5;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      padding: 0.125rem 0.5rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 640px) {
+      body::before {
+        background: rgba(255,255,255,0.96);
+      }
+      
+      .section {
+        padding: 1rem 0;
+      }
+      
+      .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .completion-section {
+        width: calc(100% - 2rem);
+      }
     }
   </style>
-  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
-  <!-- Language selection -->
-  <div id="languageSection" class="section active" style="text-align:center">
-    <div class="heading-wrap"><h2 id="langTitle">Select Language / Chagua Lugha / Saleni Ululimi / Selecione o Idioma</h2></div>
-    <div style="max-width:520px;margin:0 auto">
-      <select id="languageSelect" required></select>
-      <button type="button" id="continueBtn">Continue</button>
-      <button id="adminLoginBtn">Admin Login</button>
-    </div>
-  </div>
-
-  <!-- Check-in form -->
-  <form id="checkinForm" class="section" autocomplete="off" style="text-align:center">
-    <div class="heading-wrap"><h2 id="formTitle">Driver Check-In</h2></div>
-    <div style="max-width:520px;margin:0 auto">
-      <input type="text" id="name" list="driverNames" placeholder="Full Name" required />
-      <datalist id="driverNames"></datalist>
-      <input type="text" id="truck" placeholder="Truck Number" required />
-      <div class="row">
-        <button type="button" id="backBtn" class="danger" style="flex:1">Back</button>
-        <button type="submit" id="submitBtn" style="flex:2">Continue to Dashboard</button>
-      </div>
-    </div>
-  </form>
-
-  <!-- DASHBOARD -->
-  <div id="dashboardSection" class="section">
-    <div class="dashbar">
-      <h2 id="dashTitle">Training Dashboard</h2>
-      <div id="driverBadge" class="driver-badge">—</div>
-      <button id="adminPanelBtn" style="display:none">Admin Panel</button>
-    </div>
-    <div class="tabs">
-      <div class="tab active" data-tab="lobby" id="tabLobby">Lobby (Assigned)</div>
-      <div class="tab" data-tab="history" id="tabHistory">History (Completed)</div>
-      <button id="sortBtn" class="muted" style="max-width:220px">Sort: Recent</button>
-      <div style="flex:1"></div>
-      <button id="syncBtn" class="muted" style="max-width:200px">Sync Pending</button>
-      <button id="changeDriverBtn" class="danger" style="max-width:200px">Change Driver</button>
-    </div>
-    <div id="lobby" class="tabpanel active">
-      <div id="lobbyList" class="row"></div>
-      <p id="lobbyEmpty" style="display:none">No pending trainings. Great job!</p>
-    </div>
-    <div id="history" class="tabpanel" style="display:none">
-      <div id="historyList" class="row"></div>
-      <p id="historyEmpty" style="display:none">No completed trainings yet.</p>
-    </div>
-  </div>
-
-  <!-- Video section -->
-  <div id="videoSection" class="section">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <button type="button" id="closeBtn" class="danger" style="max-width:200px">Cancel</button>
-      <div id="activeVideoTitle" style="font-weight:700"></div>
-    </div>
-    <div id="videoNote">Loading video, please wait...</div>
-    <div id="videoContainer"></div>
-  </div>
-
-  <!-- Completion -->
-  <div id="completionSection">
-    <button id="completeBtn">Mark Complete</button>
-  </div>
-
-  <!-- Admin Login -->
-  <div id="adminLoginSection" class="section" style="text-align:center">
-    <div class="heading-wrap"><h2>Admin Login</h2></div>
-    <div class="admin-section" style="max-width:520px">
-      <input type="email" id="adminEmail" placeholder="Enter your @alistairgroup.com email" style="margin-bottom:12px" />
-      <div class="row">
-        <button type="button" id="adminBackBtn" class="danger" style="flex:1">Back</button>
-        <button type="button" id="adminSubmitBtn" style="flex:2">Login</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Panel -->
-  <div id="adminPanelSection" class="section">
-    <div class="heading-wrap"><h2>Training Admin Panel</h2></div>
-    <div class="admin-section">
-      <div class="admin-form">
-        <div class="admin-form-row">
-          <select id="adminLangSelect" required>
-            <option value="">Select Language</option>
-          </select>
-          <input type="text" id="newLangName" placeholder="New Language Name" />
-          <button type="button" id="addLangBtn" class="muted">Add Language</button>
+  <div id="app">
+    <!-- Language Selection -->
+    <section id="languageSection" class="section active">
+      <div class="container">
+        <div class="card" style="max-width: 480px; margin: 0 auto;">
+          <div class="card-header text-center">
+            <h2 id="langTitle">Select Language</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <select id="languageSelect" class="form-control" required></select>
+            </div>
+            <button id="continueBtn" class="btn btn-primary btn-block">Continue</button>
+            <button id="adminLoginBtn" class="btn btn-outline btn-block mt-3">Admin Login</button>
+          </div>
         </div>
-        <input type="text" id="videoTitle" placeholder="Video Title" required />
-        <div class="admin-form-row">
-          <select id="videoType" required>
-            <option value="">Select Video Type</option>
-            <option value="youtube">YouTube</option>
-            <option value="mp4">MP4 URL</option>
-          </select>
-          <input type="text" id="videoId" placeholder="YouTube ID or MP4 URL" required />
+      </div>
+    </section>
+
+    <!-- Driver Check-In -->
+    <section id="checkinForm" class="section">
+      <div class="container">
+        <div class="card" style="max-width: 480px; margin: 0 auto;">
+          <div class="card-header text-center">
+            <h2 id="formTitle">Driver Check-In</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <input type="text" id="name" list="driverNames" class="form-control" placeholder="Full Name" required />
+              <datalist id="driverNames"></datalist>
+            </div>
+            <div class="form-group">
+              <input type="text" id="truck" class="form-control" placeholder="Truck Number" required />
+            </div>
+            <div class="flex gap-2">
+              <button id="backBtn" class="btn btn-danger flex-1">Back</button>
+              <button id="submitBtn" class="btn btn-primary flex-2">Continue to Dashboard</button>
+            </div>
+          </div>
         </div>
-        <textarea id="videoNoteAdmin" placeholder="Optional note for drivers" rows="2"></textarea>
-        <button type="button" id="saveVideoBtn">Save Video</button>
       </div>
-      <div class="video-list" id="adminVideoList">
-        <h3>Saved Videos</h3>
-        <div id="adminVideoItems"></div>
+    </section>
+
+    <!-- Training Dashboard -->
+    <section id="dashboardSection" class="section">
+      <div class="container">
+        <div class="dashboard-header">
+          <h2 id="dashTitle">Training Dashboard</h2>
+          <div class="flex items-center gap-3">
+            <div id="driverBadge" class="driver-badge">—</div>
+            <button id="adminPanelBtn" class="btn btn-muted" style="display: none;">Admin Panel</button>
+          </div>
+        </div>
+        
+        <div class="tabs">
+          <div class="tab active" data-tab="lobby" id="tabLobby">Lobby (Assigned)</div>
+          <div class="tab" data-tab="history" id="tabHistory">History (Completed)</div>
+          <button id="sortBtn" class="btn btn-muted">Sort: Recent</button>
+          <div style="flex: 1;"></div>
+          <button id="syncBtn" class="btn btn-muted">Sync Pending</button>
+          <button id="changeDriverBtn" class="btn btn-danger">Change Driver</button>
+        </div>
+        
+        <div id="lobby" class="tabpanel active">
+          <div id="lobbyList" class="video-grid"></div>
+          <p id="lobbyEmpty" class="text-center text-muted mt-4" style="display: none;">No pending trainings. Great job!</p>
+        </div>
+        
+        <div id="history" class="tabpanel">
+          <div id="historyList" class="video-grid"></div>
+          <p id="historyEmpty" class="text-center text-muted mt-4" style="display: none;">No completed trainings yet.</p>
+        </div>
       </div>
-      <div style="margin-top:20px;text-align:center">
-        <button type="button" id="adminLogoutBtn" class="danger">Logout</button>
+    </section>
+
+    <!-- Video Player -->
+    <section id="videoSection" class="section">
+      <div class="container">
+        <div class="flex justify-between items-center mb-4">
+          <button id="closeBtn" class="btn btn-danger">Cancel</button>
+          <h3 id="activeVideoTitle" class="text-center"></h3>
+        </div>
+        
+        <div id="videoNote" class="alert alert-info" style="display: none;"></div>
+        
+        <div class="video-player-container">
+          <div id="videoContainer" class="video-player"></div>
+        </div>
       </div>
+    </section>
+
+    <!-- Completion Section -->
+    <div id="completionSection" class="completion-section">
+      <button id="completeBtn" class="btn btn-success btn-block">Mark Complete</button>
     </div>
+
+    <!-- Admin Login -->
+    <section id="adminLoginSection" class="section">
+      <div class="container">
+        <div class="card" style="max-width: 480px; margin: 0 auto;">
+          <div class="card-header text-center">
+            <h2>Admin Login</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <input type="email" id="adminEmail" class="form-control" placeholder="Corporate Email" />
+            </div>
+            <div class="form-group">
+              <input type="password" id="adminPassword" class="form-control" placeholder="Password" />
+            </div>
+            <div class="form-group">
+              <input type="password" id="adminCode" class="form-control" placeholder="Access Code" />
+            </div>
+            <p class="text-sm text-muted text-center">Use corporate email + password, or access code</p>
+            <div class="flex gap-2 mt-4">
+              <button id="adminBackBtn" class="btn btn-danger flex-1">Back</button>
+              <button id="adminSubmitBtn" class="btn btn-primary flex-2">Login</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="adminPanelSection" class="section">
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="text-center">Training Admin Panel</h2>
+          </div>
+          <div class="card-body">
+            <div class="flex flex-col gap-4">
+              <div class="card">
+                <div class="card-header">
+                  <h3>Add New Training</h3>
+                </div>
+                <div class="card-body">
+                  <div class="flex gap-3 flex-wrap">
+                    <div class="form-group flex-1" style="min-width: 200px;">
+                      <label for="adminLangSelect" class="form-label">Language</label>
+                      <select id="adminLangSelect" class="form-control" required>
+                        <option value="">Select Language</option>
+                      </select>
+                    </div>
+                    <div class="form-group flex-1" style="min-width: 200px;">
+                      <label for="newLangName" class="form-label">New Language</label>
+                      <div class="flex gap-2">
+                        <input type="text" id="newLangName" class="form-control" placeholder="Language Name" />
+                        <button id="addLangBtn" class="btn btn-muted">Add</button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group mt-3">
+                    <label for="videoTitle" class="form-label">Title</label>
+                    <input type="text" id="videoTitle" class="form-control" placeholder="Training Title" required />
+                  </div>
+                  
+                  <div class="flex gap-3 flex-wrap">
+                    <div class="form-group flex-1" style="min-width: 200px;">
+                      <label for="videoType" class="form-label">Video Type</label>
+                      <select id="videoType" class="form-control" required>
+                        <option value="">Select Type</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="drive">Google Drive</option>
+                        <option value="mp4">MP4 URL</option>
+                        <option value="local">Upload Video</option>
+                      </select>
+                    </div>
+                    <div class="form-group flex-1" style="min-width: 200px;">
+                      <label id="videoSourceLabel" for="videoId" class="form-label">YouTube ID/URL</label>
+                      <input type="text" id="videoId" class="form-control" placeholder="YouTube ID or URL" />
+                      <input type="file" id="videoFile" class="form-control mt-2" accept="video/*" style="display: none;" />
+                    </div>
+                  </div>
+                  
+                  <div class="form-group mt-3">
+                    <label for="videoNoteAdmin" class="form-label">Notes (Optional)</label>
+                    <textarea id="videoNoteAdmin" class="form-control" rows="2" placeholder="Additional information for drivers"></textarea>
+                  </div>
+                  
+                  <button id="saveVideoBtn" class="btn btn-primary btn-block mt-4">Save Training</button>
+                </div>
+              </div>
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3>Manage Trainings</h3>
+                </div>
+                <div class="card-body">
+                  <div id="adminVideoItems" class="flex flex-col gap-3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-center">
+            <button id="adminLogoutBtn" class="btn btn-danger">Logout</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div id="toast" class="toast" style="display:none"></div>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Light query helpers (FIX for unclickable buttons) -->
+  <script>
+    const $  = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  </script>
+
+  <!-- YouTube API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // ======= BACKEND BASE URL (your deployment) =======
-    const BASE_URL = 'https://script.google.com/macros/s/AKfycbyKO9F0m-VP89q2RTMpLgkKWMuUoKOR8HqReocgIrdqe7ZM1tyisLqhNDSnujdXHGyfYA/exec';
-
-    // === CONFIG ===
-    const MIN_WATCH_SECONDS = 40;
-    const REVEAL_BEFORE_END = 10;
-    const ALLOW_SEEK_TOLERANCE = 1.25;
-    const ADMIN_EMAIL_SUFFIX = '@alistairgroup.com';
-
-    // Storage keys
-    const LS_KEY_PENDING_COMPLETIONS = 'driver_training_pending_completions_v1';
-    const LS_KEY_LANG = 'driver_training_lang_v1';
-    const LS_KEY_LOBBY_SORT = 'driver_training_lobby_sort_v1';
-    const LS_KEY_CUSTOM_LANGS = 'driver_training_custom_langs_v1';
-    const LS_DRIVER_STATE_PREFIX = 'driver_training_driverstate_';
-    const LS_ADMIN_AUTH = 'driver_training_admin_auth_v1';
-
-    // i18n
-    const baseTranslations = {
-      English: { code:'en', dir:'ltr', langTitle:'Select Language', pageTitle:'Driver Check-In', continue:'Continue', back:'⬅️ Back', cancel:'❌ Cancel Video', formTitle:'Driver Check-In', name:'Full Name', truck:'Truck Number', submit:'Continue to Dashboard', complete:'Course Completed Successfully!', dash:'Training Dashboard', lobby:'Lobby (Assigned)', history:'History (Completed)', sync:'Sync Pending', change:'Change Driver', play:'Play', status:'Status', assigned:'Assigned', duration:'Duration', noPending:'No pending trainings. Great job!', noHistory:'No completed trainings yet.', loadingVideo:'Loading video, please wait...', dashboardLogin:'Dashboard Login', sort:'Sort', recent:'Recent', oldest:'Oldest' },
-      Swahili: { code:'sw', dir:'ltr', langTitle:'Chagua Lugha', pageTitle:'Kuingia kwa Dereva', continue:'Endelea', back:'⬅️ Rudi', cancel:'❌ Sitisha Video', formTitle:'Kuingia kwa Dereva', name:'Jina Kamili', truck:'Namba ya Gari', submit:'Nenda kwenye Dashibodi', complete:'Nimekamilisha Kozi', dash:'Dashibodi ya Mafunzo', lobby:'Ukumbi (Zilizokabidhiwa)', history:'Historia (Zilizokamilika)', sync:'Sawazisha', change:'Badilisha Dereva', play:'Cheza', status:'Hali', assigned:'Iliyokabidhiwa', duration:'Muda', noPending:'Hakuna mafunzo yanayosubiri. Kazi nzuri!', noHistory:'Bado hakuna mafunzo yaliyokamilika.', loadingVideo:'Inapakia video, tafadhali subiri...', dashboardLogin:'Kuingia Dashibodi', sort:'Panga', recent:'Za Hivi Karibuni', oldest:'Za Zamani' },
-      Bemba: { code:'bem', dir:'ltr', langTitle:'Sankeni Ululimi', pageTitle:'Ifyebo fya Kwingilila', continue:'Tendekela', back:'⬅️ Baya', cancel:'❌ Fumya Video', formTitle:'Ifyebo fya Kwingilila', name:'Amashina Yonse', truck:'Namba ya Motoka', submit:'Ya ku Dashboard', complete:'Nasheya ukucita bwino!', dash:'Dashboard ya Ifyakusambilila', lobby:'Lobby (Ifyasalwike)', history:'Historia (Fyapwa)', sync:'Sync', change:'Chinja Umupashi', play:'Tamba', status:'Inshita', assigned:'Lyasangwa', duration:'Ubushiku', noPending:'Tapali ifyasangwa. Umucinshi!', noHistory:'Tachapwa nangu kamo pano.', loadingVideo:'Ukupakila video, pelako umutende...', dashboardLogin:'Ukwingila pa Dashboard', sort:'Teekanya', recent:'Ifyapya', oldest:'Ifyakale' },
-      Portuguese: { code:'pt', dir:'ltr', langTitle:'Selecione o Idioma', pageTitle:'Registro do Motorista', continue:'Continuar', back:'⬅️ Voltar', cancel:'❌ Cancelar Vídeo', formTitle:'Registro do Motorista', name:'Nome Completo', truck:'Número do Caminhão', submit:'Ir para o Painel', complete:'✅ Curso concluído com sucesso!', dash:'Painel de Treinamentos', lobby:'Lobby (Atribuídos)', history:'Histórico (Concluídos)', sync:'Sincronizar', change:'Trocar Motorista', play:'Reproduzir', status:'Estado', assigned:'Atribuído', duration:'Duração', noPending:'Sem treinamentos pendentes. Bom trabalho!', noHistory:'Ainda não há treinamentos concluídos.', loadingVideo:'Carregando o vídeo, aguarde...', dashboardLogin:'Acesso ao Painel', sort:'Ordenar', recent:'Mais recentes', oldest:'Mais antigas' }
+    // ======= CONFIGURATION =======
+    const CONFIG = {
+      // Backend URL (Google Apps Script)
+      BASE_URL: 'https://script.google.com/macros/s/AKfycbyKO9F0m-VP89q2RTMpLgkKWMuUoKOR8HqReocgIrdqe7ZM1tyisLqhNDSnujdXHGyfYA/exec',
+      
+      // Video requirements
+      MIN_WATCH_SECONDS: 40,
+      REVEAL_BEFORE_END: 10,
+      ALLOW_SEEK_TOLERANCE: 1.25,
+      
+      // Admin authentication
+      ADMIN_EMAIL_SUFFIX: '@alistairgroup.com',
+      ADMIN_ACCESS_CODE: 'AG-TRAINING-2025',
+      ADMIN_CREDENTIALS: {
+        'admin@alistairgroup.com': 'admin123',
+        'training@alistairgroup.com': 'training123'
+      },
+      
+      // Logging policy
+      LOG_SESSION_START: false,  // Don't log session start events
+      LOG_COURSE_STARTED: true,  // Log when course starts
+      
+      // Local storage keys
+      STORAGE_KEYS: {
+        PENDING_EVENTS: 'driver_training_pending_events_v2',
+        LANGUAGE: 'driver_training_lang_v1',
+        SORT_PREFERENCE: 'driver_training_lobby_sort_v1',
+        CUSTOM_LANGS: 'driver_training_custom_langs_v1',
+        DRIVER_STATE: 'driver_training_driverstate_',
+        ADMIN_AUTH: 'driver_training_admin_auth_v1'
+      },
+      
+      // IndexedDB for local videos
+      DB_NAME: 'driver_training_db',
+      DB_STORE: 'videos'
     };
 
-    // Local catalog for offline fallback
-    const baseVideoLinks = {
-      English:   [ { id:'eng-001', type:'youtube', videoId:'fVl88Q5DJ2w', title:'Driver Tiredness, Fatigue and Road Safety' } ],
-      Swahili:   [ { id:'swa-002', type:'mp4', url:'https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(Swahili).mp4', title:'Kampeni ya Usalama kwa Madereva' } ],
-      Bemba:     [ { id:'bem-003', type:'mp4', url:'https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(Bemba).mp4', title:'Kampeni ya Ukusalama kwa Abapashi' } ],
-      Portuguese:[ { id:'por-004', type:'mp4', url:'https://raw.githubusercontent.com/Kwibu/API-3-Test/main/Safety%20Campaign%20for%20drivers%20(Portugal).mp4', title:'Campanha de Segurança para Motoristas' } ]
+    // ====== TRANSLATIONS ======
+    const TRANSLATIONS = {
+      English: {
+        code: 'en',
+        dir: 'ltr',
+        langTitle: 'Select Language',
+        choose: '-- Choose a Language --',
+        pageTitle: 'Driver Training Portal',
+        continue: 'Continue',
+        back: 'Back',
+        cancel: 'Cancel Video',
+        formTitle: 'Driver Check-In',
+        name: 'Full Name',
+        truck: 'Truck Number',
+        submit: 'Continue to Dashboard',
+        complete: 'Training Completed!',
+        dash: 'Training Dashboard',
+        lobby: 'Lobby (Assigned)',
+        history: 'History (Completed)',
+        sync: 'Sync Pending',
+        change: 'Change Driver',
+        play: 'Start Training',
+        status: 'Status',
+        assigned: 'Assigned',
+        duration: 'Duration',
+        noPending: 'No pending trainings. Great job!',
+        noHistory: 'No completed trainings yet.',
+        loadingVideo: 'Preparing training...',
+        dashboardLogin: 'Dashboard Login',
+        sort: 'Sort',
+        recent: 'Recent',
+        oldest: 'Oldest',
+        alertSelectLang: 'Please select a language.',
+        alertFillAll: 'Please fill in all fields.',
+        localOnly: 'Local Only'
+      },
+      Swahili: {
+        code: 'sw',
+        dir: 'ltr',
+        langTitle: 'Chagua Lugha',
+        choose: '-- Chagua Lugha --',
+        pageTitle: 'Kuingia kwa Dereva',
+        continue: 'Endelea',
+        back: 'Rudi',
+        cancel: 'Sitisha Video',
+        formTitle: 'Kuingia kwa Dereva',
+        name: 'Jina Kamili',
+        truck: 'Namba ya Gari',
+        submit: 'Nenda kwenye Dashibodi',
+        complete: 'Mafunzo yamekamilika!',
+        dash: 'Dashibodi ya Mafunzo',
+        lobby: 'Ukumbi (Zilizokabidhiwa)',
+        history: 'Historia (Zilizokamilika)',
+        sync: 'Sawazisha',
+        change: 'Badilisha Dereva',
+        play: 'Anza Mafunzo',
+        status: 'Hali',
+        assigned: 'Iliyokabidhiwa',
+        duration: 'Muda',
+        noPending: 'Hakuna mafunzo yanayosubiri. Kazi nzuri!',
+        noHistory: 'Bado hakuna mafunzo yaliyokamilika.',
+        loadingVideo: 'Inapakia mafunzo...',
+        dashboardLogin: 'Kuingia Dashibodi',
+        sort: 'Panga',
+        recent: 'Za Hivi Karibuni',
+        oldest: 'Za Zamani',
+        alertSelectLang: 'Tafadhali chagua lugha.',
+        alertFillAll: 'Tafadhali jaza sehemu zote.',
+        localOnly: 'Ya Ndani Tu'
+      },
+      Bemba: {
+        code: 'bem',
+        dir: 'ltr',
+        langTitle: 'Sankeni Ululimi',
+        choose: '-- Sankeni Ululimi --',
+        pageTitle: 'Ifyebo fya Kwingilila',
+        continue: 'Tendekela',
+        back: 'Baya',
+        cancel: 'Fumya Video',
+        formTitle: 'Ifyebo fya Kwingilila',
+        name: 'Amashina Yonse',
+        truck: 'Namba ya Motoka',
+        submit: 'Ya ku Dashboard',
+        complete: 'Ifyakusambilila fyapwa!',
+        dash: 'Dashboard ya Ifyakusambilila',
+        lobby: 'Lobby (Ifyasalwike)',
+        history: 'Historia (Fyapwa)',
+        sync: 'Sync',
+        change: 'Chinja Umupashi',
+        play: 'Anza Ifyakusambilila',
+        status: 'Inshita',
+        assigned: 'Lyasangwa',
+        duration: 'Ubushiku',
+        noPending: 'Tapali ifyasangwa. Umucinshi!',
+        noHistory: 'Tachapwa nangu kamo pano.',
+        loadingVideo: 'Ukupakila ifyakusambilila...',
+        dashboardLogin: 'Ukwingila pa Dashboard',
+        sort: 'Teekanya',
+        recent: 'Ifyapya',
+        oldest: 'Ifyakale',
+        alertSelectLang: 'Sankeni ululimi.',
+        alertFillAll: 'Sambilileni ifyose.',
+        localOnly: 'Ya Konse Konse'
+      },
+      Portuguese: {
+        code: 'pt',
+        dir: 'ltr',
+        langTitle: 'Selecione o Idioma',
+        choose: '-- Selecione o Idioma --',
+        pageTitle: 'Portal de Treinamento',
+        continue: 'Continuar',
+        back: 'Voltar',
+        cancel: 'Cancelar Vídeo',
+        formTitle: 'Registro do Motorista',
+        name: 'Nome Completo',
+        truck: 'Número do Caminhão',
+        submit: 'Ir para o Painel',
+        complete: 'Treinamento Concluído!',
+        dash: 'Painel de Treinamentos',
+        lobby: 'Lobby (Atribuídos)',
+        history: 'Histórico (Concluídos)',
+        sync: 'Sincronizar',
+        change: 'Trocar Motorista',
+        play: 'Iniciar Treinamento',
+        status: 'Estado',
+        assigned: 'Atribuído',
+        duration: 'Duração',
+        noPending: 'Sem treinamentos pendentes. Bom trabalho!',
+        noHistory: 'Ainda não há treinamentos concluídos.',
+        loadingVideo: 'Preparando treinamento...',
+        dashboardLogin: 'Acesso ao Painel',
+        sort: 'Ordenar',
+        recent: 'Mais recentes',
+        oldest: 'Mais antigas',
+        alertSelectLang: 'Selecione um idioma.',
+        alertFillAll: 'Preencha todos os campos.',
+        localOnly: 'Apenas Local'
+      }
     };
 
-    // Helpers: custom langs in localStorage
-    function loadCustomLangs(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_CUSTOM_LANGS)||'{}'); }catch{ return {}; } }
-    function saveCustomLangs(obj){ localStorage.setItem(LS_KEY_CUSTOM_LANGS, JSON.stringify(obj||{})); }
-    function getTranslations(){
-      const custom = loadCustomLangs();
-      const out = { ...baseTranslations };
-      Object.entries(custom).forEach(([lang, payload])=>{
-        if (payload.translations){ out[lang] = { ...baseTranslations.English, ...payload.translations }; }
-      });
-      return out;
-    }
-    function getVideoLinks(){
-      const custom = loadCustomLangs();
-      const out = JSON.parse(JSON.stringify(baseVideoLinks));
-      Object.entries(custom).forEach(([lang, payload])=>{
-        if (payload.videos && Array.isArray(payload.videos)){
-          out[lang] = (out[lang]||[]).concat(payload.videos);
-        }
-      });
-      return out;
-    }
-    window.addLanguage = function(langName, i18nFields, videosArray){
-      const custom = loadCustomLangs();
-      custom[langName] = custom[langName] || {};
-      if (i18nFields) custom[langName].translations = { ...(custom[langName].translations||{}), ...i18nFields };
-      if (Array.isArray(videosArray)) custom[langName].videos = (custom[langName].videos||[]).concat(videosArray);
-      saveCustomLangs(custom);
-      if (typeof window.populateLanguageSelect === 'function') window.populateLanguageSelect();
-      if (typeof window.populateAdminLangSelect === 'function') window.populateAdminLangSelect();
-      alert(`Language "${langName}" saved. Reload or re-open to use.`);
-    }
+    // ====== CORE FUNCTIONALITY ======
+    class DriverTrainingApp {
+      constructor() {
+        // State management
+        this.selectedLang = localStorage.getItem(CONFIG.STORAGE_KEYS.LANGUAGE) || 'English';
+        this.lobbySort = localStorage.getItem(CONFIG.STORAGE_KEYS.SORT_PREFERENCE) || 'recent';
+        this.driver = { name: '', truck: '' };
+        this.driverList = [];
+        this.assignments = [];
+        this.currentAssignment = null;
+        this.isAdminViewing = false;
+        
+        // Video player state
+        this.ytPlayer = null;
+        this.progressPoll = null;
+        this.maxAllowedTime = 0;
+        this.watchedSeconds = 0;
+        this.minReached = false;
+        this.startTime = null;
+        this.rowId = '';
+        this.currentObjectUrl = '';
 
-    // Admin auth
-    function isAdminLoggedIn(){ return localStorage.getItem(LS_ADMIN_AUTH) === 'true'; }
-    function setAdminLoggedIn(status){ localStorage.setItem(LS_ADMIN_AUTH, status ? 'true' : ''); }
+        // Initialize the app
+        this.initDOM();
+        this.initEventListeners();
+        this.applyTranslations(this.selectedLang);
+        this.loadDrivers();
+        this.showAdminPanel(this.isAdminLoggedIn());
+        this.renderAdminVideoList();
 
-    // Per-driver state
-    function driverKey(){ return `${driver.name}|${driver.truck}`.toLowerCase().trim(); }
-    function driverStateKey(){ return LS_DRIVER_STATE_PREFIX + encodeURIComponent(driverKey()); }
-    function loadDriverState(){ try{ return JSON.parse(localStorage.getItem(driverStateKey())||'{}'); }catch{ return {}; } }
-    function saveDriverState(state){ localStorage.setItem(driverStateKey(), JSON.stringify(state||{})); }
-    function markWatched(assignmentId, extra={}){ const st=loadDriverState(); st.watched=st.watched||{}; st.watched[assignmentId]={done:true,...extra}; saveDriverState(st); }
-
-    // App state
-    let selectedLang = localStorage.getItem(LS_KEY_LANG) || 'English';
-    let lobbySort = localStorage.getItem(LS_KEY_LOBBY_SORT) || 'recent';
-    let startTime, rowId, ytPlayer, progressPoll;
-    let maxAllowedTime = 0, watchedSeconds = 0, minReached = false;
-    let currentAssignment = null;
-
-    const driverList = [];
-    let driver = { name:'', truck:'' };
-
-    // Utils
-    function toast(msg, ms = 3000){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>{ t.style.display='none'; }, ms); }
-    function $(id){ return document.getElementById(id); }
-    function pendingCompletions(){ try { return JSON.parse(localStorage.getItem(LS_KEY_PENDING_COMPLETIONS) || '[]'); } catch { return []; } }
-    function savePendingCompletions(list){ localStorage.setItem(LS_KEY_PENDING_COMPLETIONS, JSON.stringify(list)); }
-    function enqueuePending(payload){ const list=pendingCompletions(); list.push(payload); savePendingCompletions(list); }
-    function generateId(){ return 'vid-' + Date.now().toString(36) + Math.random().toString(36).substring(2,6); }
-
-    // ===== Data I/O (all to the same Apps Script) =====
-    async function loadDrivers() {
-      try {
-        const res = await fetch(`${BASE_URL}?mode=drivers`, { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const dl = $('driverNames');
-        dl.innerHTML = '';
-        driverList.length = 0;
-        data.forEach(d => { driverList.push(d); const opt = document.createElement('option'); opt.value = d.name; dl.appendChild(opt); });
-      } catch (e) {
-        console.error('Driver fetch failed:', e);
-        toast('Could not load driver list. You can still type your name.');
+        // Auto-sync when back online
+        window.addEventListener('online', () => this.flushPendingEvents());
       }
-    }
-
-    async function fetchAssignments(name, truck){
-      try {
-        const r = await fetch(`${BASE_URL}?mode=assignments`, { cache: 'no-store' });
-        if (r.ok){
-          const json = await r.json();
-          if (Array.isArray(json.assignments)) return json.assignments;
-        }
-      } catch(e){ }
-      } catch(e){ /* offline fallback */ }
-      // Fallback: build from local catalog (all languages)
-      const vmap = getVideoLinks();
-      const all = [];
-      Object.entries(vmap).forEach(([lang, list])=>{
-        list.forEach(v=>{
-          all.push({ id:v.id, title:v.title, language:lang, source:v, status:'assigned', assignedAt:new Date().toISOString().slice(0,10) });
-          all.push({ 
-            id: v.id, 
-            title: v.title, 
-            language: lang, 
-            source: v, 
-            status: 'assigned', 
-            assignedAt: new Date().toISOString().slice(0,10),
-            isAdminAdded: true // Mark admin-added videos
-          });
+      
+      // ====== DOM INITIALIZATION ======
+      initDOM() {
+        // Populate language selects
+        this.populateLanguageSelect();
+        this.populateAdminLangSelect();
+      }
+      
+      // ====== EVENT LISTENERS ======
+      initEventListeners() {
+        // Language selection
+        $('#languageSelect').addEventListener('change', () => {
+          this.selectedLang = $('#languageSelect').value || 'English';
+          localStorage.setItem(CONFIG.STORAGE_KEYS.LANGUAGE, this.selectedLang);
+          this.applyTranslations(this.selectedLang);
+          if (this.assignments.length) this.renderDashboard(this.assignments);
         });
-      });
-      return all;
-    }
-
-    async function fetchHistory(name, truck){
-      try{
-        const url = `${BASE_URL}?mode=history&name=${encodeURIComponent(name)}&truck=${encodeURIComponent(truck)}`;
-        const r = await fetch(url, { cache:'no-store' });
-        if (!r.ok) throw new Error('net');
-        const json = await r.json();
-        return Array.isArray(json.history) ? json.history : [];
-      }catch(e){ return []; }
-      }catch(e){
-        return [];
-      }
-    }
-
-    async function postTrainingEvent(payload){
-      try {
-        const fd = new FormData(); Object.entries(payload).forEach(([k,v])=>fd.append(k, v));
-        const resp = await fetch(BASE_URL, { method: 'POST', body: fd });
-        const json = await resp.json();
-        if (!json.success) throw new Error(json.message || 'Server error');
-        return json;
-      } catch(e){ enqueuePending(payload); throw e; }
-      } catch(e){
-        enqueuePending(payload);
-        throw e;
-      }
-    }
-
-    async function postAdminVideo(videoData){
-      try {
-        const fd = new FormData(); 
-        fd.append('mode', 'admin_add_video');
-        Object.entries(videoData).forEach(([k,v])=>fd.append(k, v));
-        const resp = await fetch(BASE_URL, { method: 'POST', body: fd });
-        const json = await resp.json();
-        if (!json.success) throw new Error(json.message || 'Server error');
-        return json;
-      } catch(e){
-        console.log('Admin video saved locally (offline)', e);
-        return { success: true, offline: true };
-      }
-    }
-
-    async function flushPending(){
-      const list = pendingCompletions(); if (!list.length) { toast('Nothing to sync.'); return; }
-      const remaining = [];
-      for (const p of list){ try { await postTrainingEvent(p); } catch(e){ remaining.push(p); } }
-      for (const p of list){
-        try { await postTrainingEvent(p); } catch(e){ remaining.push(p); }
-      }
-      savePendingCompletions(remaining);
-      toast(remaining.length ? `Some items could not sync (${remaining.length}).` : 'All pending items synced.');
-    }
-
-    // ===== UI wiring =====
-    document.addEventListener('DOMContentLoaded', function(){
-      loadDrivers();
-
-      // Main sections
-      const langSection=$('languageSection'), checkinForm=$('checkinForm'), dashboard=$('dashboardSection');
-      const videoSection=$('videoSection'), adminLoginSection=$('adminLoginSection'), adminPanelSection=$('adminPanelSection');
-
-      // Language screen elements
-      const languageSelect=$('languageSelect'), continueBtn=$('continueBtn'), backBtn=$('backBtn');
-      const nameInput=$('name'), truckInput=$('truck'), submitBtn=$('submitBtn'), dashTitle=$('dashTitle'), driverBadge=$('driverBadge');
-      const tabs=document.querySelectorAll('.tab'); const lobbyList=$('lobbyList'); const historyList=$('historyList');
-      const lobbyEmpty=$('lobbyEmpty'); const historyEmpty=$('historyEmpty');
-      const changeDriverBtn=$('changeDriverBtn'); const sortBtn=$('sortBtn'); const syncBtn=$('syncBtn');
-      const changeDriverBtn=$('changeDriverBtn'); const sortBtn=$('sortBtn');
-
-      const videoSection=$('videoSection'); const videoNote=$('videoNote'); const videoContainer=$('videoContainer');
-      // Video screen elements
-      const videoNote=$('videoNote'); const videoContainer=$('videoContainer');
-      const closeBtn=$('closeBtn'); const activeVideoTitle=$('activeVideoTitle');
-
-      // Admin elements
-      const adminLoginBtn=$('adminLoginBtn'), adminBackBtn=$('adminBackBtn'), adminSubmitBtn=$('adminSubmitBtn');
-      const adminEmail=$('adminEmail'), adminPanelBtn=$('adminPanelBtn'), adminLogoutBtn=$('adminLogoutBtn');
-      const adminLangSelect=$('adminLangSelect'), newLangName=$('newLangName'), addLangBtn=$('addLangBtn');
-      const videoTitle=$('videoTitle'), videoType=$('videoType'), videoId=$('videoId'), videoNoteAdmin=$('videoNoteAdmin');
-      const saveVideoBtn=$('saveVideoBtn'), adminVideoItems=$('adminVideoItems');
-
-      function populateLanguageSelect(){
-        const tmap = getTranslations();
-        const opts = Object.keys(tmap);
-        languageSelect.innerHTML = '<option value="">-- Choose a Language --</option>' + opts.map(o=>`<option value="${o}">${o}</option>`).join('');
-        languageSelect.value = selectedLang;
-      }
-      window.populateLanguageSelect = populateLanguageSelect;
-
-      function populateAdminLangSelect(){
-        const tmap = getTranslations();
-        const opts = Object.keys(tmap);
-        adminLangSelect.innerHTML = '<option value="">-- Select Language --</option>' + opts.map(o=>`<option value="${o}">${o}</option>`).join('');
-      }
-      window.populateAdminLangSelect = populateAdminLangSelect;
-
-      function tFor(lang){ const map = getTranslations(); return map[lang] || map.English; }
-      function applyTranslations(lang){
-        const t = tFor(lang);
-        document.documentElement.lang = t.code || 'en';
-        document.documentElement.dir  = t.dir || 'ltr';
-        $('langTitle').innerText = t.langTitle || 'Select Language';
-        document.title           = t.pageTitle;
-        $('continueBtn').innerText = t.continue;
-        $('formTitle').innerText = t.formTitle;
-        nameInput.placeholder    = t.name;
-        truckInput.placeholder   = t.truck;
-        submitBtn.innerText      = t.submit;
-        backBtn.innerText        = t.back;
-        dashTitle.textContent    = t.dash;
-        $('tabLobby').textContent   = t.lobby;
-        $('tabHistory').textContent = t.history;
-        $('syncBtn').textContent    = t.sync;
-        $('changeDriverBtn').textContent = t.change;
-        lobbyEmpty.textContent      = t.noPending;
-        historyEmpty.textContent    = t.noHistory;
-        if (sortBtn) sortBtn.textContent = `${t.sort}: ${lobbySort==='recent'?t.recent:t.oldest}`;
-        $('closeBtn').innerText  = t.cancel;
-        $('videoNote').innerText = t.loadingVideo;
-        $('completeBtn').innerText = t.complete;
-      }
-
-      // Admin UI functions
-      function showAdminPanel(show){
-        if (show && !isAdminLoggedIn()) return;
-        adminPanelBtn.style.display = show ? 'block' : 'none';
-      }
-
-      function renderAdminVideoList(){
-        const vmap = getVideoLinks();
-        adminVideoItems.innerHTML = '';
         
-        Object.entries(vmap).forEach(([lang, videos]) => {
-          if (!videos.length) return;
-          
-          const langHeader = document.createElement('h4');
-          langHeader.textContent = lang;
-          langHeader.style.margin = '16px 0 8px';
-          adminVideoItems.appendChild(langHeader);
-          
-          videos.forEach(video => {
-            const item = document.createElement('div');
-            item.className = 'video-item';
-            item.innerHTML = `
-              <div>
-                <strong>${video.title}</strong>
-                <div style="font-size:12px;color:#666">${video.type} • ${video.id}</div>
-                ${video.note ? `<div style="font-size:12px;color:#666">${video.note}</div>` : ''}
-              </div>
-              <div class="video-item-actions">
-                <button class="muted" onclick="window.adminPlayVideo('${lang}', '${video.id}')">Play</button>
-                <button class="danger" onclick="window.adminDeleteVideo('${lang}', '${video.id}')">Delete</button>
-              </div>
-            `;
-            adminVideoItems.appendChild(item);
-          });
-        });
-      }
-      window.adminPlayVideo = function(lang, videoId){
-        const vmap = getVideoLinks();
-        const video = vmap[lang]?.find(v => v.id === videoId);
-        if (!video) return;
-        
-        // Simulate an assignment
-        const fakeAssignment = {
-          id: video.id,
-          title: video.title,
-          language: lang,
-          source: video,
-          status: 'assigned',
-          assignedAt: new Date().toISOString().slice(0,10),
-          isAdminAdded: true
-        };
-        
-        startAssignment(fakeAssignment);
-      };
-      window.adminDeleteVideo = function(lang, videoId){
-        if (!confirm(`Delete this video? This can't be undone.`)) return;
-        
-        const custom = loadCustomLangs();
-        if (custom[lang]?.videos) {
-          custom[lang].videos = custom[lang].videos.filter(v => v.id !== videoId);
-          saveCustomLangs(custom);
-          renderAdminVideoList();
-          toast('Video deleted');
-          
-          // Refresh dashboard if open
-          if (window.__assignments) {
-            window.__assignments = window.__assignments.filter(a => a.id !== videoId);
-            renderDashboard(window.__assignments);
+        // Continue to check-in
+        $('#continueBtn').addEventListener('click', () => {
+          if (!$('#languageSelect').value) {
+            const t = this.getTranslations()[this.selectedLang] || TRANSLATIONS.English;
+            this.showToast(t.alertSelectLang || 'Please select a language.');
+            return;
           }
-        }
-      };
-
-      // Initialize UI
-      populateLanguageSelect();
-      populateAdminLangSelect();
-      languageSelect.value = selectedLang;
-      applyTranslations(selectedLang);
-      showAdminPanel(isAdminLoggedIn());
-      renderAdminVideoList();
-
-      // Event listeners
-      languageSelect.addEventListener('change', ()=>{
-        selectedLang = languageSelect.value || 'English';
-        localStorage.setItem(LS_KEY_LANG, selectedLang);
-        applyTranslations(selectedLang);
-        if (window.__assignments) renderDashboard(window.__assignments);
-      });
-
-      continueBtn.addEventListener('click', ()=>{
-        if (!languageSelect.value){ alert('Please select a language.'); return; }
-        selectedLang = languageSelect.value; localStorage.setItem(LS_KEY_LANG, selectedLang);
-        applyTranslations(selectedLang);
-        langSection.classList.remove('active'); checkinForm.classList.add('active');
-      });
-
-      backBtn.addEventListener('click', ()=>{
-        checkinForm.reset(); languageSelect.value = selectedLang;
-        applyTranslations(selectedLang);
-        checkinForm.classList.remove('active'); langSection.classList.add('active');
-      });
-
-      // Admin login/logout
-      adminLoginBtn.addEventListener('click', () => {
-        langSection.classList.remove('active');
-        adminLoginSection.classList.add('active');
-      });
-
-      adminBackBtn.addEventListener('click', () => {
-        adminLoginSection.classList.remove('active');
-        langSection.classList.add('active');
-      });
-
-      adminSubmitBtn.addEventListener('click', () => {
-        const email = adminEmail.value.trim();
-        if (!email.endsWith(ADMIN_EMAIL_SUFFIX)) {
-          alert(`Only @alistairgroup.com emails are allowed.`);
-          return;
-        }
-        setAdminLoggedIn(true);
-        adminLoginSection.classList.remove('active');
-        adminPanelSection.classList.add('active');
-        adminEmail.value = '';
-        showAdminPanel(true);
-      });
-
-      adminPanelBtn.addEventListener('click', () => {
-        dashboard.classList.remove('active');
-        adminPanelSection.classList.add('active');
-      });
-
-      adminLogoutBtn.addEventListener('click', () => {
-        setAdminLoggedIn(false);
-        adminPanelSection.classList.remove('active');
-        langSection.classList.add('active');
-        showAdminPanel(false);
-      });
-
-      // Admin video management
-      addLangBtn.addEventListener('click', () => {
-        const langName = newLangName.value.trim();
-        if (!langName) {
-          alert('Please enter a language name');
-          return;
-        }
+          this.selectedLang = $('#languageSelect').value;
+          localStorage.setItem(CONFIG.STORAGE_KEYS.LANGUAGE, this.selectedLang);
+          this.applyTranslations(this.selectedLang);
+          $('#languageSection').classList.remove('active');
+          $('#checkinForm').classList.add('active');
+        });
         
-        const custom = loadCustomLangs();
-        if (!custom[langName]) {
+        // Back from check-in (section, not form)
+        $('#backBtn').addEventListener('click', () => {
+          $('#name').value = '';
+          $('#truck').value = '';
+          $('#languageSelect').value = this.selectedLang;
+          this.applyTranslations(this.selectedLang);
+          $('#checkinForm').classList.remove('active');
+          $('#languageSection').classList.add('active');
+        });
+        
+        // Driver check-in button (since #checkinForm is not a <form>)
+        $('#submitBtn').addEventListener('click', async (e) => {
+          e.preventDefault();
+          const t = this.getTranslations()[this.selectedLang] || TRANSLATIONS.English;
+          
+          if (!$('#name').value.trim() || !$('#truck').value.trim()) {
+            this.showToast(t.alertFillAll || 'Please fill in all fields.');
+            return;
+          }
+          
+          $('#submitBtn').disabled = true;
+          this.driver = { 
+            name: $('#name').value.trim(), 
+            truck: $('#truck').value.trim() 
+          };
+          
+          // Save driver state
+          const driverState = this.loadDriverState();
+          driverState.lang = this.selectedLang;
+          this.saveDriverState(driverState);
+          
+          // Update UI
+          $('#driverBadge').textContent = `${this.driver.name} • ${this.driver.truck}`;
+          this.applyTranslations(this.selectedLang);
+          
+          // Show dashboard immediately
+          $('#checkinForm').classList.remove('active');
+          $('#dashboardSection').classList.add('active');
+          
+          // Load assignments and history (with timeout)
+          await this.loadDriverData();
+          
+          $('#submitBtn').disabled = false;
+        });
+        
+        // Name autocomplete for truck number
+        $('#name').addEventListener('input', () => {
+          const match = this.driverList.find(d => 
+            d.name.toLowerCase() === $('#name').value.toLowerCase()
+          );
+          $('#truck').value = match ? match.truck : '';
+        });
+        
+        // Dashboard tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.addEventListener('click', () => this.setActiveTab(tab.dataset.tab));
+        });
+        
+        // Sort button
+        $('#sortBtn').addEventListener('click', () => {
+          this.lobbySort = this.lobbySort === 'recent' ? 'oldest' : 'recent';
+          localStorage.setItem(CONFIG.STORAGE_KEYS.SORT_PREFERENCE, this.lobbySort);
+          this.applyTranslations(this.selectedLang);
+          this.renderDashboard(this.assignments);
+        });
+        
+        // Change driver button
+        $('#changeDriverBtn').addEventListener('click', () => {
+          $('#dashboardSection').classList.remove('active');
+          $('#checkinForm').classList.add('active');
+          this.applyTranslations(this.selectedLang);
+        });
+        
+        // Sync pending button
+        $('#syncBtn').addEventListener('click', () => this.flushPendingEvents());
+        
+        // Video close button
+        $('#closeBtn').addEventListener('click', () => this.closeVideoPlayer());
+        
+        // Delegated handler for dynamic complete button
+        document.addEventListener('click', (e) => {
+          if (e.target && e.target.id === 'completeBtn') this.submitCompletion();
+        });
+        
+        // Admin login
+        $('#adminLoginBtn').addEventListener('click', () => {
+          $('#languageSection').classList.remove('active');
+          $('#adminLoginSection').classList.add('active');
+        });
+        
+        $('#adminBackBtn').addEventListener('click', () => {
+          $('#adminLoginSection').classList.remove('active');
+          $('#languageSection').classList.add('active');
+        });
+        
+        $('#adminSubmitBtn').addEventListener('click', () => {
+          const email = $('#adminEmail').value.trim().toLowerCase();
+          const password = $('#adminPassword').value.trim();
+          const code = $('#adminCode').value.trim();
+          
+          // Tighten authentication
+          const codeOK = code && code === CONFIG.ADMIN_ACCESS_CODE;
+          const corpOK = email.endsWith(CONFIG.ADMIN_EMAIL_SUFFIX);
+          const mapOK = CONFIG.ADMIN_CREDENTIALS[email] && CONFIG.ADMIN_CREDENTIALS[email] === password;
+          const allow = codeOK || (corpOK && mapOK);
+          
+          if (!allow) {
+            this.showToast('Invalid admin credentials');
+            return;
+          }
+          
+          this.setAdminLoggedIn(true);
+          $('#adminEmail').value = '';
+          $('#adminPassword').value = '';
+          $('#adminCode').value = '';
+          $('#adminLoginSection').classList.remove('active');
+          $('#adminPanelSection').classList.add('active');
+          this.showAdminPanel(true);
+        });
+        
+        // Admin panel
+        $('#adminPanelBtn').addEventListener('click', () => {
+          $('#dashboardSection').classList.remove('active');
+          $('#adminPanelSection').classList.add('active');
+        });
+        
+        $('#adminLogoutBtn').addEventListener('click', () => {
+          this.setAdminLoggedIn(false);
+          $('#adminPanelSection').classList.remove('active');
+          $('#languageSection').classList.add('active');
+          this.showAdminPanel(false);
+        });
+        
+        // Admin: add language
+        $('#addLangBtn').addEventListener('click', () => {
+          const langName = $('#newLangName').value.trim();
+          if (!langName) {
+            this.showToast('Please enter a language name');
+            return;
+          }
+          
+          const custom = this.loadCustomLangs();
+          if (custom[langName]) {
+            this.showToast('This language already exists');
+            return;
+          }
+          
           custom[langName] = { translations: {}, videos: [] };
-          saveCustomLangs(custom);
-          populateLanguageSelect();
-          populateAdminLangSelect();
-          newLangName.value = '';
-          toast(`Language "${langName}" added`);
-        } else {
-          alert('This language already exists');
-        }
-      });
-
-      saveVideoBtn.addEventListener('click', async () => {
-        const lang = adminLangSelect.value;
-        const title = videoTitle.value.trim();
-        const type = videoType.value;
-        const idOrUrl = videoId.value.trim();
-        const note = videoNoteAdmin.value.trim();
+          this.saveCustomLangs(custom);
+          this.populateLanguageSelect();
+          this.populateAdminLangSelect();
+          $('#newLangName').value = '';
+          this.showToast(`Language "${langName}" added`);
+        });
         
-        if (!lang || !title || !type || !idOrUrl) {
-          alert('Please fill all required fields');
+        // Admin: video type change
+        $('#videoType').addEventListener('change', () => {
+          const type = $('#videoType').value;
+          $('#videoId').style.display = type === 'local' ? 'none' : 'block';
+          $('#videoFile').style.display = type === 'local' ? 'block' : 'none';
+          
+          // Update label
+          const label = $('#videoSourceLabel');
+          if (type === 'youtube') label.textContent = 'YouTube ID/URL';
+          else if (type === 'drive') label.textContent = 'Google Drive URL';
+          else if (type === 'mp4') label.textContent = 'MP4 URL';
+          else label.textContent = 'Video File';
+        });
+        
+        // Admin: save video
+        $('#saveVideoBtn').addEventListener('click', async () => {
+          const lang = $('#adminLangSelect').value;
+          const title = $('#videoTitle').value.trim();
+          const type = $('#videoType').value;
+          const note = $('#videoNoteAdmin').value.trim();
+          
+          if (!lang || !title || !type) {
+            this.showToast('Please fill all required fields');
+            return;
+          }
+          
+          let videoData = { 
+            id: this.generateId(), 
+            title, 
+            type, 
+            note 
+          };
+          
+          try {
+            // Handle different video types
+            if (type === 'youtube') {
+              const idOrUrl = $('#videoId').value.trim();
+              const videoId = this.parseYouTubeId(idOrUrl);
+              if (!videoId) {
+                this.showToast('Invalid YouTube ID or URL');
+                return;
+              }
+              videoData.videoId = videoId;
+            } 
+            else if (type === 'drive') {
+              const url = $('#videoId').value.trim();
+              const driveId = this.extractDriveFileId(url);
+              if (!driveId) {
+                this.showToast('Invalid Google Drive link');
+                return;
+              }
+              videoData.driveId = driveId;
+            } 
+            else if (type === 'mp4') {
+              const url = $('#videoId').value.trim();
+              if (!/^https?:\/\//i.test(url)) {
+                this.showToast('Enter a valid MP4 URL');
+                return;
+              }
+              videoData.url = url;
+            } 
+            else if (type === 'local') {
+              const file = $('#videoFile').files?.[0];
+              if (!file) {
+                this.showToast('Choose a video file');
+                return;
+              }
+              
+              // Store in IndexedDB
+              const localKey = videoData.id;
+              try {
+                await this.idbPut(localKey, file);
+                videoData.localKey = localKey;
+              } catch (e) {
+                console.error('Failed to store video:', e);
+                this.showToast('Failed to store video file');
+                return;
+              }
+            }
+            
+            // Save video data
+            const vmap = this.getVideoLinks();
+            const list = (vmap[lang] || []).filter(v => v.id !== videoData.id).concat(videoData);
+            this.setVideoLinksForLang(lang, list);
+            
+            // Try to sync to server (except local videos)
+            if (type !== 'local') {
+              try {
+                await this.postAdminVideo({ language: lang, ...videoData });
+              } catch (e) {
+                // Offline is okay
+              }
+            }
+            
+            // Reset form
+            $('#videoTitle').value = '';
+            $('#videoType').value = '';
+            $('#videoId').value = '';
+            $('#videoFile').value = '';
+            $('#videoFile').style.display = 'none';
+            $('#videoNoteAdmin').value = '';
+            
+            // Refresh UI
+            this.renderAdminVideoList();
+            
+            // Add to current assignments if dashboard is open
+            if (this.assignments) {
+              const assignment = {
+                id: videoData.id,
+                title,
+                language: lang,
+                source: videoData,
+                status: 'assigned',
+                assignedAt: new Date().toISOString().slice(0, 10),
+                isAdminAdded: true
+              };
+              
+              this.assignments.push(assignment);
+              this.renderDashboard(this.assignments);
+            }
+            
+            this.showToast('Training saved successfully');
+          } catch (error) {
+            console.error('Error saving video:', error);
+            this.showToast('Error saving training');
+          }
+        });
+      }
+      
+      // ====== CORE METHODS ======
+      async loadDriverData() {
+        let assignments = [];
+        let history = [];
+        
+        // Show loading state
+        $('#lobbyList').innerHTML = '';
+        $('#lobbyEmpty').style.display = 'none';
+        
+        // Load data with timeout
+        const softTimeout = new Promise(resolve => setTimeout(resolve, 1800));
+        const loadPromise = (async () => {
+          [assignments, history] = await Promise.all([
+            this.fetchAssignmentsMerged(),
+            this.fetchHistory(this.driver.name, this.driver.truck)
+          ]);
+        })();
+        
+        await Promise.race([loadPromise, softTimeout]);
+        
+        // If no assignments yet, try once more
+        if (!assignments.length) {
+          assignments = await this.fetchAssignmentsMerged();
+        }
+        
+        // Merge with history and render
+        this.assignments = this.mergeServerHistory(assignments, history);
+        this.hydrateLocalWatchedFromServer(history);
+        this.renderDashboard(this.assignments);
+        
+        // Final merge after all data is loaded
+        await loadPromise;
+        this.assignments = this.mergeServerHistory(assignments, history);
+        this.renderDashboard(this.assignments);
+      }
+      
+      async startAssignment(assignment) {
+        this.currentAssignment = assignment;
+        this.maxAllowedTime = 0;
+        this.watchedSeconds = 0;
+        this.minReached = false;
+        this.selectedLang = assignment.language || this.selectedLang || 'English';
+        localStorage.setItem(CONFIG.STORAGE_KEYS.LANGUAGE, this.selectedLang);
+        this.applyTranslations(this.selectedLang);
+        
+        this.startTime = new Date();
+        this.rowId = '';
+        
+        // Log course start (unless admin preview)
+        if (CONFIG.LOG_COURSE_STARTED && !this.isAdminViewing) {
+          try {
+            const res = await this.postTrainingEvent({
+              op: 'start',
+              name: this.driver.name,
+              truck: this.driver.truck,
+              language: this.selectedLang,
+              videoTitle: assignment.title,
+              status: 'Course Started',
+              assignmentId: assignment.id
+            });
+            
+            if (res?.row) this.rowId = res.row;
+          } catch (e) {
+            // Queued for later sync
+          }
+        }
+        
+        // Show video section
+        $('#dashboardSection').classList.remove('active');
+        $('#videoSection').classList.add('active');
+        $('#activeVideoTitle').textContent = assignment.title;
+        this.showLoadingNote(true);
+        
+        // Get video metadata
+        const vmap = this.getVideoLinks();
+        const meta = (vmap[this.selectedLang] || []).find(v => v.id === assignment.id) || assignment.source || {};
+        
+        // Render player
+        this.renderPlayer(meta);
+      }
+      
+      renderPlayer(meta) {
+        const type = meta.type;
+        $('#videoContainer').innerHTML = '';
+        $('#completionSection').style.display = 'none';
+        
+        if (type === 'youtube') {
+          const videoId = meta.videoId;
+          $('#videoContainer').innerHTML = '<div id="ytPlayer"></div>';
+          
+          const initPlayer = () => {
+            this.ytPlayer = new YT.Player('ytPlayer', {
+              videoId,
+              width: '100%',
+              height: '100%',
+              playerVars: {
+                controls: 1,
+                disablekb: 1,
+                fs: 0,
+                modestbranding: 1,
+                rel: 0,
+                iv_load_policy: 3,
+                playsinline: 1
+              },
+              events: {
+                onReady: this.onYTReady.bind(this),
+                onStateChange: this.onYTStateChange.bind(this)
+              }
+            });
+          };
+
+          if (window.YT && window.YT.Player) {
+            initPlayer();
+          } else if (!window._ytReadyHooked) {
+            window._ytReadyHooked = true;
+            window.onYouTubeIframeAPIReady = () => initPlayer();
+          }
+        } 
+        else if (type === 'mp4') {
+          const url = meta.url;
+          $('#videoContainer').innerHTML = `
+            <video id="trainingVideo" controls controlsList="nodownload noplaybackrate" 
+                   disablepictureinpicture playsinline></video>
+          `;
+          
+          const video = $('#trainingVideo');
+          video.src = url;
+          
+          video.addEventListener('loadeddata', () => this.showLoadingNote(false), { once: true });
+          video.addEventListener('canplay', () => this.showLoadingNote(false), { once: true });
+          
+          video.playbackRate = 1;
+          video.addEventListener('ratechange', () => {
+            if (video.playbackRate !== 1) video.playbackRate = 1;
+          });
+          
+          video.addEventListener('seeking', () => {
+            if (video.currentTime > this.maxAllowedTime + CONFIG.ALLOW_SEEK_TOLERANCE) {
+              video.currentTime = this.maxAllowedTime;
+            }
+          });
+          
+          video.addEventListener('timeupdate', () => {
+            if (video.currentTime > this.maxAllowedTime) {
+              this.maxAllowedTime = video.currentTime;
+            }
+            
+            this.watchedSeconds = Math.max(this.watchedSeconds, Math.floor(this.maxAllowedTime));
+            
+            if (!this.minReached && this.watchedSeconds >= CONFIG.MIN_WATCH_SECONDS) {
+              this.minReached = true;
+              $('#completionSection').style.display = 'block';
+            }
+            
+            const remaining = video.duration - video.currentTime;
+            if (remaining <= CONFIG.REVEAL_BEFORE_END) {
+              $('#completionSection').style.display = 'block';
+            }
+          });
+          
+          video.addEventListener('ended', () => this.autoComplete());
+          
+          video.play().catch(() => {
+            this.showToast('Tap play to start the video');
+          });
+        } 
+        else if (type === 'drive') {
+          const fid = meta.driveId;
+          const src = `https://drive.google.com/file/d/${fid}/preview`;
+          const iframe = document.createElement('iframe');
+          iframe.src = src;
+          iframe.allow = 'autoplay; encrypted-media';
+          iframe.allowFullscreen = true;
+          iframe.onload = () => this.showLoadingNote(false);
+          $('#videoContainer').appendChild(iframe);
+          
+          // For Drive videos, we can't track time precisely, so use a timer
+          let seconds = 0;
+          const timer = setInterval(() => {
+            seconds++;
+            this.watchedSeconds = Math.max(this.watchedSeconds, seconds);
+            
+            if (!this.minReached && seconds >= CONFIG.MIN_WATCH_SECONDS) {
+              this.minReached = true;
+              $('#completionSection').style.display = 'block';
+              clearInterval(timer);
+            }
+          }, 1000);
+        } 
+        else if (type === 'local') {
+          this.idbGetUrl(meta.localKey).then(url => {
+            if (!url) {
+              this.showLoadingNote(false);
+              this.showToast('Local file missing on this device');
+              return;
+            }
+            
+            this.currentObjectUrl = url;
+
+            $('#videoContainer').innerHTML = `
+              <video id="trainingVideo" controls controlsList="nodownload noplaybackrate" 
+                     disablepictureinpicture playsinline></video>
+            `;
+            
+            const video = $('#trainingVideo');
+            video.src = url;
+            
+            video.addEventListener('loadeddata', () => this.showLoadingNote(false), { once: true });
+            video.addEventListener('canplay', () => this.showLoadingNote(false), { once: true });
+            
+            video.playbackRate = 1;
+            video.addEventListener('ratechange', () => {
+              if (video.playbackRate !== 1) video.playbackRate = 1;
+            });
+            
+            video.addEventListener('seeking', () => {
+              if (video.currentTime > this.maxAllowedTime + CONFIG.ALLOW_SEEK_TOLERANCE) {
+                video.currentTime = this.maxAllowedTime;
+              }
+            });
+            
+            video.addEventListener('timeupdate', () => {
+              if (video.currentTime > this.maxAllowedTime) {
+                this.maxAllowedTime = video.currentTime;
+              }
+              
+              this.watchedSeconds = Math.max(this.watchedSeconds, Math.floor(this.maxAllowedTime));
+              
+              if (!this.minReached && this.watchedSeconds >= CONFIG.MIN_WATCH_SECONDS) {
+                this.minReached = true;
+                $('#completionSection').style.display = 'block';
+              }
+              
+              const remaining = video.duration - video.currentTime;
+              if (remaining <= CONFIG.REVEAL_BEFORE_END) {
+                $('#completionSection').style.display = 'block';
+              }
+            });
+            
+            video.addEventListener('ended', () => this.autoComplete());
+            
+            video.play().catch(() => {
+              this.showToast('Tap play to start the video');
+            });
+          });
+        } 
+        else {
+          this.showLoadingNote(false);
+          this.showToast('Video source missing');
+        }
+      }
+      
+      async submitCompletion() {
+        const end = new Date();
+        const ms = end - this.startTime;
+        const durationMin = Math.max(1, Math.round(ms / 60000));
+        
+        const payload = {
+          op: 'complete',
+          name: this.driver.name,
+          truck: this.driver.truck,
+          language: this.selectedLang,
+          videoTitle: this.currentAssignment?.title || 'Unknown',
+          status: 'Completed',
+          duration: `${durationMin} minutes`,
+          assignmentId: this.currentAssignment?.id,
+          updateRowId: this.rowId || ''
+        };
+        
+        let ok = true;
+        
+        try {
+          await this.postTrainingEvent(payload);
+        } catch (e) {
+          ok = false;
+        }
+        
+        // Mark as watched locally
+        if (this.currentAssignment?.id) {
+          this.markWatched(this.currentAssignment.id, {
+            completedAt: new Date().toISOString().slice(0, 10),
+            duration: `${durationMin} minutes`,
+            language: this.selectedLang
+          });
+        }
+        
+        // Update assignments list
+        if (this.assignments && this.currentAssignment) {
+          const idx = this.assignments.findIndex(a => a.id === this.currentAssignment.id);
+          if (idx > -1) {
+            this.assignments[idx].status = 'completed';
+            this.assignments[idx].completedAt = new Date().toISOString().slice(0, 10);
+            this.assignments[idx].duration = `${durationMin} minutes`;
+            this.assignments[idx].language = this.selectedLang;
+          }
+        }
+        
+        // Show completion message
+        const t = this.getTranslations()[this.selectedLang] || TRANSLATIONS.English;
+        this.showToast(t.complete);
+        $('#videoContainer').innerHTML = '';
+        
+        // Return to dashboard after delay
+        setTimeout(() => {
+          $('#videoSection').classList.remove('active');
+          $('#dashboardSection').classList.add('active');
+          $('#completionSection').style.display = 'none';
+          this.isAdminViewing = false; // Reset admin preview flag
+          this.renderDashboard(this.assignments || []);
+          this.applyTranslations(this.selectedLang);
+        }, 700);
+        
+        if (!ok) {
+          this.showToast('Saved offline. Will sync when you tap "Sync Pending".');
+        }
+      }
+      
+      closeVideoPlayer() {
+        clearInterval(this.progressPoll);
+        
+        if (this.ytPlayer) {
+          try {
+            this.ytPlayer.destroy();
+          } catch (e) {
+            console.error('Error destroying YT player:', e);
+          }
+          this.ytPlayer = null;
+        }
+
+        if (this.currentObjectUrl) {
+          try { URL.revokeObjectURL(this.currentObjectUrl); } catch (_) {}
+          this.currentObjectUrl = '';
+        }
+        
+        $('#videoSection').classList.remove('active');
+        
+        if (this.isAdminViewing) {
+          $('#adminPanelSection').classList.add('active');
+        } else {
+          $('#dashboardSection').classList.add('active');
+        }
+        
+        $('#completionSection').style.display = 'none';
+        $('#videoContainer').innerHTML = '';
+        this.showLoadingNote(false);
+        this.applyTranslations(this.selectedLang);
+        this.isAdminViewing = false;
+      }
+      
+      // ====== YOUTUBE PLAYER EVENTS ======
+      onYTReady(event) {
+        this.showLoadingNote(false);
+        
+        try {
+          event.target.setPlaybackRate(1);
+        } catch (e) {
+          console.error('Error setting playback rate:', e);
+        }
+        
+        event.target.playVideo();
+        
+        clearInterval(this.progressPoll);
+        this.progressPoll = setInterval(() => {
+          if (!this.ytPlayer) return;
+          
+          const currentTime = this.ytPlayer.getCurrentTime();
+          const duration = this.ytPlayer.getDuration();
+          
+          if (currentTime > this.maxAllowedTime) {
+            this.maxAllowedTime = currentTime;
+          }
+          
+          if (currentTime > this.maxAllowedTime + CONFIG.ALLOW_SEEK_TOLERANCE) {
+            this.ytPlayer.seekTo(this.maxAllowedTime, true);
+          }
+          
+          this.watchedSeconds = Math.max(this.watchedSeconds, Math.floor(this.maxAllowedTime));
+          
+          if (!this.minReached && this.watchedSeconds >= CONFIG.MIN_WATCH_SECONDS) {
+            this.minReached = true;
+            $('#completionSection').style.display = 'block';
+          }
+          
+          if (duration && (duration - currentTime) <= CONFIG.REVEAL_BEFORE_END) {
+            $('#completionSection').style.display = 'block';
+          }
+          
+          try {
+            if (this.ytPlayer.getPlaybackRate && this.ytPlayer.getPlaybackRate() !== 1) {
+              this.ytPlayer.setPlaybackRate(1);
+            }
+          } catch (e) {
+            console.error('Error checking playback rate:', e);
+          }
+        }, 500);
+      }
+      
+      onYTStateChange(event) {
+        const YT_ENDED = 0;
+        if (event.data === YT_ENDED) {
+          this.autoComplete();
+        }
+      }
+      
+      autoComplete() {
+        if (!this.minReached && this.watchedSeconds < CONFIG.MIN_WATCH_SECONDS) {
+          $('#completionSection').style.display = 'block';
           return;
         }
         
-        const videoData = {
-          id: generateId(),
-          title,
-          type,
-          note,
-          [type === 'youtube' ? 'videoId' : 'url']: idOrUrl
-        };
+        this.submitCompletion();
+      }
+      
+      // ====== UI METHODS ======
+      showLoadingNote(show) {
+        const t = this.getTranslations()[this.selectedLang] || TRANSLATIONS.English;
+        $('#videoNote').style.display = show ? 'block' : 'none';
         
-        // Save locally
-        const custom = loadCustomLangs();
-        custom[lang] = custom[lang] || { translations: {}, videos: [] };
-        custom[lang].videos = custom[lang].videos.filter(v => v.id !== videoData.id); // Remove if exists
-        custom[lang].videos.push(videoData);
-        saveCustomLangs(custom);
-        
-        // Try to sync to server
-        try {
-          await postAdminVideo({
-            language: lang,
-            ...videoData
-          });
-          toast('Video saved' + (window.navigator.onLine ? '' : ' (offline)'));
-        } catch(e) {
-          toast('Video saved locally (offline)');
+        if (show) {
+          $('#videoNote').textContent = t.loadingVideo || 'Loading video, please wait...';
         }
+      }
+      
+      showToast(message, duration = 3000) {
+        const toast = $('#toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
         
-        // Reset form and refresh lists
-        videoTitle.value = '';
-        videoType.value = '';
-        videoId.value = '';
-        videoNoteAdmin.value = '';
-        renderAdminVideoList();
-      });
-
-      // Datalist auto-fill for truck when exact match on name
-      nameInput.addEventListener('input', ()=>{
-        const match = driverList.find(d => d.name.toLowerCase() === nameInput.value.toLowerCase());
-        truckInput.value = match ? match.truck : '';
-      });
-
-      checkinForm.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        if (!nameInput.value.trim() || !truckInput.value.trim()){ alert('Please fill in all fields.'); return; }
-        submitBtn.disabled = true;
-        driver = { name: nameInput.value.trim(), truck: truckInput.value.trim() };
-
-        const st0 = loadDriverState(); st0.lang = selectedLang; saveDriverState(st0);
-
-        driverBadge.textContent = `${driver.name} • ${driver.truck}`;
-        applyTranslations(selectedLang);
-
-        let assignments = await fetchAssignments(driver.name, driver.truck);
-        const history = await fetchHistory(driver.name, driver.truck);
-        assignments = mergeServerHistory(assignments, history);
-        hydrateLocalWatchedFromServer(history);
-
-        window.__assignments = assignments;
-        renderDashboard(assignments);
-
-        checkinForm.classList.remove('active'); dashboard.classList.add('active');
-        submitBtn.disabled = false;
-      }); // closed correctly so functions below are top-scope
-
-        try {
-          await postTrainingEvent({ name: driver.name, truck: driver.truck, language: selectedLang, videoTitle: tFor(selectedLang).dashboardLogin, status: 'Session Start' });
-        } catch(e){ /* queued */ }
-      });
-
-      function setActiveTab(tabName){
-        document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active', el.dataset.tab===tabName));
-        document.querySelectorAll('.tabpanel').forEach(el=>el.style.display = (el.id===tabName? 'block':'none'));
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, duration);
       }
-      tabs.forEach(t=> t.addEventListener('click', ()=> setActiveTab(t.dataset.tab)));
-
-      changeDriverBtn.addEventListener('click', ()=>{
-      $('changeDriverBtn').addEventListener('click', ()=>{
-        dashboard.classList.remove('active'); checkinForm.classList.add('active'); applyTranslations(selectedLang);
-      });
-      syncBtn.addEventListener('click', flushPending);
-      $('syncBtn').addEventListener('click', flushPending);
-      if (sortBtn) sortBtn.addEventListener('click', ()=>{
-        lobbySort = (lobbySort==='recent') ? 'oldest' : 'recent';
-        localStorage.setItem(LS_KEY_LOBBY_SORT, lobbySort);
-        applyTranslations(selectedLang);
-        renderDashboard(window.__assignments || []);
-      });
-
-      function mergeServerHistory(assignments, hist){
-        const byId = new Map(assignments.map(a=>[a.id,a]));
-        hist.forEach(h=>{
-          const a = byId.get(h.assignmentId);
-          if (a){
-            a.status = 'completed';
-            a.completedAt = h.completedAt || a.completedAt || new Date().toISOString().slice(0,10);
-            a.duration = h.duration || a.duration;
-            a.language = h.language || a.language;
-          } else {
-            byId.set(h.assignmentId, { id: h.assignmentId, title: h.title || 'Completed Training', language: h.language || selectedLang, source: null, status: 'completed', completedAt: h.completedAt || new Date().toISOString().slice(0,10), duration: h.duration });
-            byId.set(h.assignmentId, {
-              id: h.assignmentId,
-              title: h.title || 'Completed Training',
-              language: h.language || selectedLang,
-              source: null,
-              status: 'completed',
-              completedAt: h.completedAt || new Date().toISOString().slice(0,10),
-              duration: h.duration
-            });
-          }
+      
+      setActiveTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => {
+          tab.classList.toggle('active', tab.dataset.tab === tabName);
         });
-        return Array.from(byId.values());
-      }
-
-      function hydrateLocalWatchedFromServer(hist){
-        if (!hist || !hist.length) return;
-        const st = loadDriverState(); st.watched = st.watched || {};
-        hist.forEach(h=>{ st.watched[h.assignmentId] = { done:true, completedAt: h.completedAt || new Date().toISOString().slice(0,10), duration: h.duration, language: h.language }; });
-        hist.forEach(h=>{
-          st.watched[h.assignmentId] = { done:true, completedAt: h.completedAt || new Date().toISOString().slice(0,10), duration: h.duration, language: h.language };
+        
+        document.querySelectorAll('.tabpanel').forEach(panel => {
+          panel.style.display = panel.id === tabName ? 'block' : 'none';
         });
-        saveDriverState(st);
       }
-
-      function renderDashboard(assignments){
-        window.__assignments = assignments;
-        const t = tFor(selectedLang);
-        const st = loadDriverState();
-        const watched = st.watched || {};
-
-        const inLang = assignments.filter(a=> (a.language||selectedLang) === selectedLang);
-
-        inLang.forEach(a=>{
+      
+      populateLanguageSelect() {
+        const tmap = this.getTranslations();
+        const t = tmap[this.selectedLang] || TRANSLATIONS.English;
+        const opts = Object.keys(tmap);
+        
+        $('#languageSelect').innerHTML = `
+          <option value="">${t.choose || '-- Choose a Language --'}</option>
+          ${opts.map(lang => `<option value="${lang}">${lang}</option>`).join('')}
+        `;
+        
+        $('#languageSelect').value = this.selectedLang;
+      }
+      
+      populateAdminLangSelect() {
+        const tmap = this.getTranslations();
+        const opts = Object.keys(tmap);
+        
+        $('#adminLangSelect').innerHTML = `
+          <option value="">-- Select Language --</option>
+          ${opts.map(lang => `<option value="${lang}">${lang}</option>`).join('')}
+        `;
+      }
+      
+      applyTranslations(lang) {
+        const t = this.getTranslations()[lang] || TRANSLATIONS.English;
+        
+        // Set document language and direction
+        document.documentElement.lang = t.code || 'en';
+        document.documentElement.dir = t.dir || 'ltr';
+        
+        // Update page title
+        document.title = t.pageTitle;
+        
+        // Language selection
+        $('#langTitle').textContent = t.langTitle;
+        const emptyOpt = $('#languageSelect').querySelector('option[value=""]');
+        if (emptyOpt) emptyOpt.textContent = t.choose;
+        
+        // Check-in form
+        $('#formTitle').textContent = t.formTitle;
+        $('#name').placeholder = t.name;
+        $('#truck').placeholder = t.truck;
+        $('#submitBtn').textContent = t.submit;
+        $('#backBtn').textContent = t.back;
+        
+        // Dashboard
+        $('#dashTitle').textContent = t.dash;
+        $('#tabLobby').textContent = t.lobby;
+        $('#tabHistory').textContent = t.history;
+        $('#syncBtn').textContent = t.sync;
+        $('#changeDriverBtn').textContent = t.change;
+        $('#lobbyEmpty').textContent = t.noPending;
+        $('#historyEmpty').textContent = t.noHistory;
+        
+        // Video player
+        $('#closeBtn').textContent = t.cancel;
+        const completeBtn = $('#completeBtn'); if (completeBtn) completeBtn.textContent = t.complete;
+        
+        // Update sort button
+        $('#sortBtn').textContent = `${t.sort}: ${this.lobbySort === 'recent' ? t.recent : t.oldest}`;
+      }
+      
+      renderDashboard(assignments) {
+        this.assignments = assignments;
+        const t = this.getTranslations()[this.selectedLang] || TRANSLATIONS.English;
+        const watched = this.loadDriverState().watched || {};
+        
+        // Filter assignments for current language
+        const inLang = assignments.filter(a => (a.language || this.selectedLang) === this.selectedLang);
+        
+        // Update status based on watched state
+        inLang.forEach(a => {
           if (watched[a.id]?.done) {
             a.status = 'completed';
             a.completedAt = a.completedAt || watched[a.id].completedAt;
             a.duration = a.duration || watched[a.id].duration;
           }
         });
-
-        const pending = inLang.filter(a=>a.status !== 'completed');
-        pending.sort((a,b)=>{
-          const da = Date.parse(a.assignedAt||'');
-          const db = Date.parse(b.assignedAt||'');
-          const va = isNaN(da) ? (lobbySort==='recent' ? -Infinity : Infinity) : da;
-          const vb = isNaN(db) ? (lobbySort==='recent' ? -Infinity : Infinity) : db;
-          return lobbySort==='recent' ? (vb - va) : (va - vb);
+        
+        // Pending assignments
+        const pending = inLang.filter(a => a.status !== 'completed');
+        pending.sort((a, b) => {
+          const da = Date.parse(a.assignedAt || '');
+          const db = Date.parse(b.assignedAt || '');
+          const va = isNaN(da) ? (this.lobbySort === 'recent' ? -Infinity : Infinity) : da;
+          const vb = isNaN(db) ? (this.lobbySort === 'recent' ? -Infinity : Infinity) : db;
+          return this.lobbySort === 'recent' ? (vb - va) : (va - vb);
         });
-        lobbyList.innerHTML = '';
-        lobbyEmpty.style.display = pending.length ? 'none' : 'block';
-        pending.forEach(a=> lobbyList.appendChild(makeAssignmentCard(a, true, t)));
-
-        const done = inLang.filter(a=>a.status === 'completed');
-        done.sort((a,b)=> Date.parse(b.completedAt||0) - Date.parse(a.completedAt||0));
-        historyList.innerHTML = '';
-        historyEmpty.style.display = done.length ? 'none' : 'block';
-        done.forEach(a=> historyList.appendChild(makeAssignmentCard(a, false, t)));
+        
+        $('#lobbyList').innerHTML = '';
+        $('#lobbyEmpty').style.display = pending.length ? 'none' : 'block';
+        
+        pending.forEach(a => {
+          $('#lobbyList').appendChild(this.createAssignmentCard(a, true, t));
+        });
+        
+        // Completed assignments
+        const done = inLang.filter(a => a.status === 'completed');
+        done.sort((a, b) => Date.parse(b.completedAt || 0) - Date.parse(a.completedAt || 0));
+        
+        $('#historyList').innerHTML = '';
+        $('#historyEmpty').style.display = done.length ? 'none' : 'block';
+        
+        done.forEach(a => {
+          $('#historyList').appendChild(this.createAssignmentCard(a, false, t));
+        });
       }
-
-      function makeAssignmentCard(a, withPlay, t){
-        const card = document.createElement('div'); card.className = 'card';
-        const when  = a.status==='completed' ? (a.completedAt? ` • ${a.completedAt}`: '') : (a.assignedAt? ` • ${t.assigned} ${a.assignedAt}`: '');
-        const when  = a.status==='completed'
-          ? (a.completedAt? ` • ${a.completedAt}`: '')
-          : (a.assignedAt? ` • ${t.assigned} ${a.assignedAt}`: '');
-        card.innerHTML = `<div style="font-weight:700">${a.title}<span class="pill">${a.language}</span></div><div style="font-size:13px;color:#374151;margin:6px 0 10px">${t.status}: ${a.status}${when}</div>`;
-        if (withPlay){
-          const btn = document.createElement('button'); btn.textContent = t.play; btn.addEventListener('click', ()=> startAssignment(a)); card.appendChild(btn);
-        } else if (a.duration) {
-          const note = document.createElement('div'); note.style.fontSize='12px'; note.style.color='#6b7280'; note.textContent = `${t.duration}: ${a.duration}`; card.appendChild(note);
+      
+      createAssignmentCard(assignment, withPlay, t) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        const localOnly = assignment.source?.type === 'local' ? 
+          `<span class="local-only">${t.localOnly}</span>` : '';
+        
+        const when = assignment.status === 'completed' ?
+          (assignment.completedAt ? ` • ${assignment.completedAt}` : '') :
+          (assignment.assignedAt ? ` • ${t.assigned} ${assignment.assignedAt}` : '');
+        
+        card.innerHTML = `
+          <div class="card-body">
+            <div class="flex justify-between items-start">
+              <h4>${assignment.title}${localOnly}</h4>
+              <span class="badge badge-primary">${assignment.language}</span>
+            </div>
+            <p class="text-sm text-muted mt-2">
+              ${t.status}: <span class="font-medium">${assignment.status}</span>${when}
+            </p>
+            ${withPlay ? '' : (assignment.duration ? `
+              <p class="text-sm text-muted mt-2">${t.duration}: ${assignment.duration}</p>
+            ` : '')}
+          </div>
+          ${withPlay ? `
+            <div class="card-footer">
+              <button class="btn btn-primary btn-block">${t.play}</button>
+            </div>
+          ` : ''}
+        `;
+        
+        if (withPlay) {
+          const btn = card.querySelector('button');
+          btn.addEventListener('click', () => this.startAssignment(assignment));
         }
+        
         return card;
       }
-
-      async function startAssignment(a){
-        currentAssignment = a; maxAllowedTime = 0; watchedSeconds = 0; minReached = false;
-        selectedLang = a.language || selectedLang || 'English';
-        localStorage.setItem(LS_KEY_LANG, selectedLang);
-        applyTranslations(selectedLang);
-
-        startTime = new Date();
-        const payload = { name: driver.name, truck: driver.truck, language: selectedLang, videoTitle: a.title, status: 'Course Started', assignmentId: a.id };
-        try { const res = await postTrainingEvent(payload); rowId = res.row; } catch(e){ }
-        try { const res = await postTrainingEvent(payload); rowId = res.row; } catch(e){ /* queued */ }
-
-        $('dashboardSection').classList.remove('active');
-        $('videoSection').classList.add('active');
-
-        activeVideoTitle.textContent = a.title;
-        const catalog = tFor(selectedLang);
-        const vmap = getVideoLinks();
-        const langList = vmap[selectedLang]||[];
-        const meta = langList.find(v=>v.id===a.id) || {};
-        $('videoNote').innerText = (meta.note) || (catalog ? catalog.loadingVideo : 'Loading video...');
-        $('completionSection').style.display = 'none';
-        $('completeBtn').disabled = false;
-        videoContainer.innerHTML = '';
-
-        if (a.source?.type === 'youtube' || meta.type==='youtube') {
-          const videoId = a.source?.videoId || meta.videoId;
-          videoContainer.innerHTML = '<div id="ytPlayer"></div>';
-          window.onYouTubeIframeAPIReady = function () {
-            ytPlayer = new YT.Player('ytPlayer', {
-              videoId,
-              width: '100%', height: '390',
-              playerVars: { controls: 1, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, iv_load_policy: 3, playsinline: 1 },
-              events: { onReady: onYTReady, onStateChange: onYTState }
+      
+      renderAdminVideoList() {
+        const vmap = this.getVideoLinks();
+        const container = $('#adminVideoItems');
+        container.innerHTML = '';
+        
+        Object.entries(vmap).forEach(([lang, videos]) => {
+          if (!videos.length) return;
+          
+          const langHeader = document.createElement('h4');
+          langHeader.className = 'mb-2';
+          langHeader.textContent = lang;
+          container.appendChild(langHeader);
+          
+          videos.forEach(video => {
+            const item = document.createElement('div');
+            item.className = 'card mb-3';
+            
+            const localBadge = video.type === 'local' ? 
+              `<span class="local-only">${TRANSLATIONS.English.localOnly}</span>` : '';
+            
+            item.innerHTML = `
+              <div class="card-body">
+                <div class="flex justify-between items-start">
+                  <h4>${video.title}${localBadge}</h4>
+                  <div class="flex gap-2">
+                    <button class="btn btn-sm btn-muted">Play</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                  </div>
+                </div>
+                <p class="text-sm text-muted mt-1">${video.type} • ${video.id}</p>
+                ${video.note ? `<p class="text-sm mt-2">${video.note}</p>` : ''}
+              </div>
+            `;
+            
+            const playBtn = item.querySelector('.btn-muted');
+            const deleteBtn = item.querySelector('.btn-danger');
+            
+            playBtn.addEventListener('click', () => {
+              this.isAdminViewing = true;
+              const fakeAssignment = {
+                id: video.id,
+                title: video.title,
+                language: lang,
+                source: video,
+                status: 'assigned',
+                assignedAt: new Date().toISOString().slice(0, 10),
+                isAdminAdded: true
+              };
+              
+              this.startAssignment(fakeAssignment);
             });
-          };
-          if (window.YT && window.YT.Player) window.onYouTubeIframeAPIReady();
-        } else if (a.source?.type === 'mp4' || meta.type==='mp4') {
-          const url = a.source?.url || meta.url;
-          videoContainer.innerHTML = `<video id="trainingVideo" controls controlsList="nodownload noplaybackrate noremoteplayback" disablepictureinpicture playsinline src="${url}"></video>`;
-          const tv = $('trainingVideo');
-          tv.playbackRate = 1; tv.addEventListener('ratechange', ()=>{ if (tv.playbackRate !== 1) tv.playbackRate = 1; });
-          tv.addEventListener('seeking', ()=>{ if (tv.currentTime > maxAllowedTime + ALLOW_SEEK_TOLERANCE) tv.currentTime = maxAllowedTime; });
-          tv.addEventListener('timeupdate', ()=>{
-            if (tv.currentTime > maxAllowedTime) maxAllowedTime = tv.currentTime;
-            watchedSeconds = Math.max(watchedSeconds, Math.floor(maxAllowedTime));
-            if (!minReached && watchedSeconds >= MIN_WATCH_SECONDS) { minReached = true; $('completionSection').style.display = 'block'; }
-            const remaining = tv.duration - tv.currentTime; if (remaining <= REVEAL_BEFORE_END) $('completionSection').style.display = 'block';
+            
+            deleteBtn.addEventListener('click', async () => {
+              if (!confirm('Delete this training? This cannot be undone.')) return;
+              
+              const custom = this.loadCustomLangs();
+              if (custom[lang]?.videos) {
+                custom[lang].videos = custom[lang].videos.filter(v => v.id !== video.id);
+                this.saveCustomLangs(custom);
+                
+                // Delete local file if exists
+                if (video.type === 'local' && video.localKey) {
+                  try {
+                    await this.idbDelete(video.localKey);
+                  } catch (e) {
+                    console.error('Error deleting local video:', e);
+                  }
+                }
+                
+                this.renderAdminVideoList();
+                
+                // Update dashboard if open
+                if (this.assignments) {
+                  this.assignments = this.assignments.filter(a => a.id !== video.id);
+                  this.renderDashboard(this.assignments);
+                }
+                
+                this.showToast('Training deleted');
+              }
+            });
+            
+            container.appendChild(item);
           });
-          tv.addEventListener('ended', autoComplete);
-          tv.play().catch(()=>toast('Tap play to start the video.'));
-        } else {
-          toast('Video source missing.');
+        });
+      }
+      
+      showAdminPanel(show) {
+        if (show && !this.isAdminLoggedIn()) return;
+        $('#adminPanelBtn').style.display = show ? 'block' : 'none';
+      }
+      
+      // ====== DATA METHODS ======
+      async loadDrivers() {
+        try {
+          const res = await fetch(`${CONFIG.BASE_URL}?mode=drivers`, { cache: 'no-store' });
+          
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          
+          const data = await res.json();
+          const datalist = $('#driverNames');
+          datalist.innerHTML = '';
+          
+          this.driverList = Array.isArray(data) ? data : [];
+          this.driverList.forEach(driver => {
+            const option = document.createElement('option');
+            option.value = driver.name;
+            datalist.appendChild(option);
+          });
+        } catch (e) {
+          console.error('Failed to load drivers:', e);
         }
       }
-
-      function onYTReady(event){
-        try { event.target.setPlaybackRate(1); } catch(_){}
-        event.target.playVideo();
-        clearInterval(progressPoll);
-        progressPoll = setInterval(()=>{
-          if (!ytPlayer) return;
-          const ct = ytPlayer.getCurrentTime(); const dur = ytPlayer.getDuration();
-          if (ct > maxAllowedTime) maxAllowedTime = ct;
-          if (ct > maxAllowedTime + ALLOW_SEEK_TOLERANCE) { ytPlayer.seekTo(maxAllowedTime, true); }
-          watchedSeconds = Math.max(watchedSeconds, Math.floor(maxAllowedTime));
-          if (!minReached && watchedSeconds >= MIN_WATCH_SECONDS) { minReached = true; $('completionSection').style.display = 'block'; }
-          if (dur && (dur - ct) <= REVEAL_BEFORE_END) $('completionSection').style.display = 'block';
-          try { if (ytPlayer.getPlaybackRate && ytPlayer.getPlaybackRate() !== 1) ytPlayer.setPlaybackRate(1); } catch(_){ }
-          try { if (ytPlayer.getPlaybackRate && ytPlayer.getPlaybackRate() !== 1) ytPlayer.setPlaybackRate(1); } catch(_){}
-        }, 500);
-      }
-      function onYTState(e){ const YTENDED = 0; if (e.data === YTENDED) autoComplete(); }
-      async function autoComplete(){ if (!minReached && watchedSeconds < MIN_WATCH_SECONDS) { $('completionSection').style.display = 'block'; return; } await submitCompletion(); }
-
-      async function submitCompletion(){
-        const end = new Date(); const ms = end - startTime; const durationMin = Math.max(1, Math.round(ms/60000));
-        const payload = { name: driver.name, truck: driver.truck, videoTitle: currentAssignment?.title || 'Unknown', status:'Completed', duration: `${durationMin} minutes`, rowId, assignmentId: currentAssignment?.id, language: selectedLang };
-        const payload = {
-          name: driver.name, truck: driver.truck, videoTitle: currentAssignment?.title || 'Unknown',
-          status:'Completed', duration: `${durationMin} minutes`, rowId, assignmentId: currentAssignment?.id, language: selectedLang
-        };
-        let ok = true;
-        try { await postTrainingEvent(payload); } catch(e){ ok = false; }
-
-        if (currentAssignment?.id) markWatched(currentAssignment.id, { completedAt: new Date().toISOString().slice(0,10), duration: `${durationMin} minutes`, language: selectedLang });
-        if (currentAssignment?.id) markWatched(currentAssignment.id, {
-          completedAt: new Date().toISOString().slice(0,10), duration: `${durationMin} minutes`, language: selectedLang
+      
+      async fetchAssignmentsMerged() {
+        const vmap = this.getVideoLinks();
+        const localLangList = (vmap[this.selectedLang] || []).map(video => ({
+          id: video.id,
+          title: video.title,
+          language: this.selectedLang,
+          source: video,
+          status: 'assigned',
+          assignedAt: new Date().toISOString().slice(0, 10),
+          isAdminAdded: true
+        }));
+        
+        // Try to fetch from server
+        let serverAssignments = [];
+        
+        try {
+          const res = await fetch(`${CONFIG.BASE_URL}?mode=assignments`, { cache: 'no-store' });
+          
+          if (res.ok) {
+            const data = await res.json();
+            
+            if (Array.isArray(data.assignments)) {
+              serverAssignments = data.assignments.map(a => {
+                if (!a.source && a.type) {
+                  a.source = { 
+                    type: a.type, 
+                    videoId: a.videoId, 
+                    url: a.url, 
+                    driveId: a.driveId 
+                  };
+                }
+                
+                if (!a.language) {
+                  a.language = this.selectedLang;
+                }
+                
+                return a;
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch assignments:', e);
+        }
+        
+        // Merge and dedupe (prefer server fields)
+        const byId = new Map();
+        
+        [...serverAssignments, ...localLangList].forEach(a => {
+          if (!a) return;
+          byId.set(a.id, { ...a, ...(byId.get(a.id) || {}) });
         });
-
-        if (window.__assignments && currentAssignment){
-          const idx = window.__assignments.findIndex(x=>x.id===currentAssignment.id);
-          if (idx>-1){
-            window.__assignments[idx].status='completed';
-            window.__assignments[idx].completedAt = new Date().toISOString().slice(0,10);
-            window.__assignments[idx].duration = `${durationMin} minutes`;
-            window.__assignments[idx].language = selectedLang;
+        
+        // Fallback: if nothing, load all local across languages
+        if (byId.size === 0) {
+          Object.entries(vmap).forEach(([lang, videos]) => {
+            videos.forEach(video => {
+              byId.set(video.id, {
+                id: video.id,
+                title: video.title,
+                language: lang,
+                source: video,
+                status: 'assigned',
+                assignedAt: new Date().toISOString().slice(0, 10),
+                isAdminAdded: true
+              });
+            });
+          });
+        }
+        
+        return Array.from(byId.values());
+      }
+      
+      async fetchHistory(name, truck) {
+        try {
+          const url = `${CONFIG.BASE_URL}?mode=history&name=${encodeURIComponent(name)}&truck=${encodeURIComponent(truck)}`;
+          const res = await fetch(url, { cache: 'no-store' });
+          
+          if (!res.ok) {
+            throw new Error('Network error');
+          }
+          
+          const data = await res.json();
+          return Array.isArray(data.history) ? data.history : [];
+        } catch (e) {
+          console.error('Failed to fetch history:', e);
+          return [];
+        }
+      }
+      
+      mergeServerHistory(assignments, history) {
+        const byId = new Map(assignments.map(a => [a.id, a]));
+        
+        history.forEach(record => {
+          const key = record.assignmentId || record.id;
+          if (!key) return;
+          const existing = byId.get(key);
+          
+          if (existing) {
+            existing.status = 'completed';
+            existing.completedAt = record.completedAt || existing.completedAt || new Date().toISOString().slice(0, 10);
+            existing.duration = record.duration || existing.duration;
+            existing.language = record.language || existing.language;
+          } else {
+            byId.set(key, {
+              id: key,
+              title: record.title || 'Completed Training',
+              language: record.language || this.selectedLang,
+              source: null,
+              status: 'completed',
+              completedAt: record.completedAt || new Date().toISOString().slice(0, 10),
+              duration: record.duration
+            });
+          }
+        });
+        
+        return Array.from(byId.values());
+      }
+      
+      hydrateLocalWatchedFromServer(history) {
+        if (!history?.length) return;
+        
+        const state = this.loadDriverState();
+        state.watched = state.watched || {};
+        
+        history.forEach(record => {
+          const id = record.assignmentId || record.id;
+          if (!id) return;
+          state.watched[id] = {
+            done: true,
+            completedAt: record.completedAt || new Date().toISOString().slice(0, 10),
+            duration: record.duration,
+            language: record.language
+          };
+        });
+        
+        this.saveDriverState(state);
+      }
+      
+      async postTrainingEvent(payload) {
+        // Skip if admin preview or session start (when disabled)
+        if (this.isAdminViewing) return { success: true, preview: true };
+        if (!CONFIG.LOG_COURSE_STARTED && payload.status === 'Course Started') {
+          return { success: true, skipped: true };
+        }
+        
+        try {
+          const formData = new FormData();
+          formData.append('mode', 'event');
+          
+          Object.entries(payload).forEach(([key, value]) => {
+            formData.append(key, value ?? '');
+          });
+          
+          const res = await fetch(CONFIG.BASE_URL, {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await res.json();
+          
+          if (data.success === false) {
+            throw new Error(data.message || 'Server error');
+          }
+          
+          return data;
+        } catch (e) {
+          // Only queue completion events (not course started)
+          if (payload.status === 'Completed') {
+            this.enqueuePendingEvent(payload);
+          }
+          
+          throw e;
+        }
+      }
+      
+      async postAdminVideo(videoData) {
+        try {
+          const formData = new FormData();
+          formData.append('mode', 'admin_add_video');
+          
+          Object.entries(videoData).forEach(([key, value]) => {
+            formData.append(key, value ?? '');
+          });
+          
+          const res = await fetch(CONFIG.BASE_URL, {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await res.json();
+          
+          if (data.success === false) {
+            throw new Error(data.message || 'Server error');
+          }
+          
+          return data;
+        } catch (e) {
+          console.log('Admin video saved locally (offline)', e);
+          return { success: true, offline: true };
+        }
+      }
+      
+      async flushPendingEvents() {
+        const pending = this.pendingEvents();
+        
+        if (!pending.length) {
+          this.showToast('Nothing to sync');
+          return;
+        }
+        
+        const remaining = [];
+        
+        for (const event of pending) {
+          try {
+            await this.postTrainingEvent(event);
+          } catch (e) {
+            remaining.push(event);
           }
         }
-
-        $('completionSection').innerHTML = `<h3>${tFor(selectedLang).complete}</h3>`;
-        videoContainer.innerHTML = '';
-        setTimeout(()=>{
-          $('videoSection').classList.remove('active');
-          $('dashboardSection').classList.add('active');
-          $('completionSection').style.display='none';
-          $('completionSection').innerHTML = '<button id="completeBtn">Mark Complete</button>';
-          attachCompleteButton();
-          renderDashboard(window.__assignments||[]);
-          applyTranslations(selectedLang);
-        }, 1200);
-
-        if (!ok) toast('Saved offline. Will sync when you tap "Sync Pending".');
+        
+        this.savePendingEvents(remaining);
+        
+        if (remaining.length) {
+          this.showToast(`Some items could not sync (${remaining.length})`);
+        } else {
+          this.showToast('All pending items synced');
+        }
       }
+      
+      // ====== LOCAL STORAGE METHODS ======
+      loadCustomLangs() {
+        try {
+          return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.CUSTOM_LANGS) || '{}');
+        } catch {
+          return {};
+        }
+      }
+      
+      saveCustomLangs(data) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.CUSTOM_LANGS, JSON.stringify(data || {}));
+      }
+      
+      getTranslations() {
+        const custom = this.loadCustomLangs();
+        const translations = { ...TRANSLATIONS };
+        
+        Object.entries(custom).forEach(([lang, data]) => {
+          if (data.translations) {
+            translations[lang] = { ...TRANSLATIONS.English, ...data.translations };
+          }
+        });
+        
+        return translations;
+      }
+      
+      getVideoLinks() {
+        const custom = this.loadCustomLangs();
+        const links = JSON.parse(JSON.stringify({
+          English: [
+            { id: 'eng-001', type: 'youtube', videoId: 'fVl88Q5DJ2w', title: 'Driver Tiredness, Fatigue and Road Safety' }
+          ],
+          Swahili: [
+            { id: 'swa-002', type: 'mp4', url: 'https://example.com/swahili-safety.mp4', title: 'Kampeni ya Usalama kwa Madereva' }
+          ],
+          Bemba: [
+            { id: 'bem-003', type: 'mp4', url: 'https://example.com/bemba-safety.mp4', title: 'Kampeni ya Ukusalama kwa Abapashi' }
+          ],
+          Portuguese: [
+            { id: 'por-004', type: 'mp4', url: 'https://example.com/portuguese-safety.mp4', title: 'Campanha de Segurança para Motoristas' }
+          ]
+        }));
+        
+        Object.entries(custom).forEach(([lang, data]) => {
+          if (data.videos && Array.isArray(data.videos)) {
+            links[lang] = (links[lang] || []).concat(data.videos);
+          }
+        });
+        
+        return links;
+      }
+      
+      setVideoLinksForLang(lang, videos) {
+        const custom = this.loadCustomLangs();
+        custom[lang] = custom[lang] || { translations: {}, videos: [] };
+        custom[lang].videos = videos;
+        this.saveCustomLangs(custom);
+      }
+      
+      pendingEvents() {
+        try {
+          return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.PENDING_EVENTS) || '[]');
+        } catch {
+          return [];
+        }
+      }
+      
+      savePendingEvents(events) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.PENDING_EVENTS, JSON.stringify(events || []));
+      }
+      
+      enqueuePendingEvent(event) {
+        const pending = this.pendingEvents();
+        pending.push(event);
+        this.savePendingEvents(pending);
+      }
+      
+      isAdminLoggedIn() {
+        return localStorage.getItem(CONFIG.STORAGE_KEYS.ADMIN_AUTH) === 'true';
+      }
+      
+      setAdminLoggedIn(status) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.ADMIN_AUTH, status ? 'true' : '');
+      }
+      
+      driverKey() {
+        return `${this.driver.name}|${this.driver.truck}`.toLowerCase().trim();
+      }
+      
+      driverStateKey() {
+        return CONFIG.STORAGE_KEYS.DRIVER_STATE + encodeURIComponent(this.driverKey());
+      }
+      
+      loadDriverState() {
+        try {
+          return JSON.parse(localStorage.getItem(this.driverStateKey()) || '{}');
+        } catch {
+          return {};
+        }
+      }
+      
+      saveDriverState(state) {
+        localStorage.setItem(this.driverStateKey(), JSON.stringify(state || {}));
+      }
+      
+      markWatched(assignmentId, extra = {}) {
+        const state = this.loadDriverState();
+        state.watched = state.watched || {};
+        state.watched[assignmentId] = { done: true, ...extra };
+        this.saveDriverState(state);
+      }
+      
+      // ====== INDEXEDDB METHODS ======
+      async idbPut(key, blob) {
+        const db = await this.openDb();
+        
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(CONFIG.DB_STORE, 'readwrite');
+          tx.objectStore(CONFIG.DB_STORE).put(blob, key);
+          
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+      
+      async idbGetUrl(key) {
+        const db = await this.openDb();
+        
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(CONFIG.DB_STORE, 'readonly');
+          const req = tx.objectStore(CONFIG.DB_STORE).get(key);
+          
+          req.onsuccess = () => {
+            const blob = req.result;
+            if (!blob) return resolve('');
+            const url = URL.createObjectURL(blob);
+            resolve(url);
+          };
+          
+          req.onerror = () => reject(req.error);
+        });
+      }
+      
+      async idbDelete(key) {
+        const db = await this.openDb();
+        
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(CONFIG.DB_STORE, 'readwrite');
+          tx.objectStore(CONFIG.DB_STORE).delete(key);
+          
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => reject(tx.error);
+        });
+      }
+      
+      openDb() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(CONFIG.DB_NAME, 1);
+          
+          req.onupgradeneeded = (e) => {
+            e.target.result.createObjectStore(CONFIG.DB_STORE);
+          };
+          
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+      
+      // ====== UTILITY METHODS ======
+      generateId() {
+        return 'vid-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+      }
+      
+      parseYouTubeId(input) {
+        const idRegex = /^[a-zA-Z0-9_-]{11}$/;
+        if (idRegex.test(input)) return input;
+        
+        try {
+          const url = new URL(input);
+          
+          if (url.hostname.includes('youtube.com')) {
+            if (url.pathname.startsWith('/watch')) {
+              return url.searchParams.get('v') || '';
+            }
+            
+            if (url.pathname.startsWith('/embed/')) {
+              return url.pathname.split('/embed/')[1] || '';
+            }
+            
+            if (url.pathname.startsWith('/shorts/')) {
+              return url.pathname.split('/shorts/')[1] || '';
+            }
+          }
+          
+          if (url.hostname === 'youtu.be') {
+            return url.pathname.replace('/', '');
+          }
+        } catch {
+          return '';
+        }
+        
+        return '';
+      }
+      
+      extractDriveFileId(url) {
+        try {
+          const u = new URL(url);
+          
+          if (u.hostname.includes('drive.google.com')) {
+            const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+            if (match) return match[1];
+            
+            const id = u.searchParams.get('id');
+            if (id) return id;
+          }
+        } catch {
+          return '';
+        }
+        
+        return '';
+      }
+    }
 
-      function attachCompleteButton(){ const btn = $('completeBtn'); if (btn) btn.addEventListener('click', submitCompletion); }
-      $('completeBtn').addEventListener('click', submitCompletion);
-      closeBtn.addEventListener('click', ()=>{
-        clearInterval(progressPoll);
-        if (ytPlayer) { try { ytPlayer.destroy(); } catch(e){} ytPlayer = null; }
-        $('videoSection').classList.remove('active');
-        $('dashboardSection').classList.add('active');
-        $('completionSection').style.display='none';
-        videoContainer.innerHTML='';
-        applyTranslations(selectedLang);
-      });
-
-      attachCompleteButton();
-      applyTranslations(selectedLang);
-
-      console.assert(typeof submitCompletion === 'function', 'submitCompletion should be defined');
-      console.assert(typeof autoComplete === 'function', 'autoComplete should be defined');
+    // Initialize the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new DriverTrainingApp();
     });
   </script>
 </body>
